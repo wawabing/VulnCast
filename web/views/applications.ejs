@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Applications - VulnCast</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.css" rel="stylesheet">
+</head>
+<body>
+  <div class="dashboard-container">
+    <%- include('partials/sidebar', { activeNav: 'applications' }) %>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+      <header class="dashboard-header">
+        <h1>Applications Management</h1>
+        <div class="header-actions">
+          <span class="last-updated" id="lastUpdated">Loading...</span>
+          <button class="refresh-btn" id="refreshBtn">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Applications Table -->
+      <div class="table-container">
+        <div class="table-header">
+          <h2><i class="fas fa-cube"></i> All Applications</h2>
+          <div class="table-stats" id="appStats">
+            <span class="stat-badge">Loading...</span>
+            <button class="enrich-btn" id="enrichBtn">
+              <i class="fas fa-shield-alt"></i> Enrich with CVEs
+            </button>
+          </div>
+        </div>
+        
+        <div class="table-wrapper">
+          <table class="data-table" id="applicationsTable">
+            <thead>
+              <tr>
+                <th>Application Name</th>
+                <th>Publisher</th>
+                <th>Version</th>
+                <th>Device Count</th>
+                <th>CVE Count</th>
+                <th>Severity</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="applicationsTableBody">
+              <tr>
+                <td colspan="7" class="loading-row">Loading application data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <%- include('partials/loading') %>
+
+  <script src="/js/applications.js"></script>
+</body>
+</html>

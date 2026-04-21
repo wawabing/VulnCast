@@ -1,0 +1,66 @@
+{
+  "org": {
+    "org_id": "org-001",
+    "org_name": "Imported Organization"
+  },
+  "users": [
+    {
+      "user_id": "user-001",
+      "username": "Full Name",
+      "email_address": "email@example.com",
+      "org_id": "org-001"
+    },
+    {
+      "user_id": "user-002",
+      "username": "Full Name",
+      "email_address": "email@example.com",
+      "org_id": "org-001"
+    }
+  ],
+  "Platforms": [
+    {
+      "platform_device_count": "234",
+      "platform_name": "Windows"
+    },
+    {
+      "platform_device_count": "185",
+      "platform_name": "macOS"
+    }
+  ],
+  "devices": [
+    {
+      "device_id": "DEVICE-001",
+      "device_name": "Device Name",
+      "os_description": "Windows 11 Pro",
+      "os_version": "10.0.xxxx",
+      "platform": "Windows",
+      "user_id": "user-001"
+    },
+    {
+      "device_id": "DEVICE-002",
+      "device_name": "Device Name",
+      "os_description": "Windows 10 Pro",
+      "os_version": "10.0.xxxx",
+      "platform": "Windows",
+      "user_id": "user-002"
+    }
+  ],
+  "applications": [
+    {
+      "application_key": "app-001",
+      "application_name": "Application Name",
+      "application_publisher": "Publisher Name",
+      "application_short_version": "1.0",
+      "application_version": "1.0.1234",
+      "device_ids": ["DEVICE-001", "DEVICE-002"]
+    },
+    {
+      "application_key": "app-002",
+      "application_name": "Application Name",
+      "application_publisher": "Publisher Name",
+      "application_short_version": "2.5",
+      "application_version": "2.5.6789",
+      "device_ids": ["DEVICE-001"]
+    }
+  ]
+}

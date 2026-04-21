@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Processing - VulnCast</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.css" rel="stylesheet">
+</head>
+<body>
+  <div class="processing-container">
+    <div class="processing-card">
+      <div class="processing-logo">
+        <i class="fas fa-shield-alt"></i>
+        <span>VulnCast</span>
+      </div>
+      
+      <div class="processing-content">
+        <div class="processing-spinner">
+          <div class="spinner-ring"></div>
+          <div class="spinner-ring"></div>
+          <div class="spinner-ring"></div>
+        </div>
+        
+        <h2 class="processing-title">Processing Your Security Data</h2>
+        <p class="processing-subtitle">Enriching applications with vulnerability intelligence</p>
+        
+        <div class="processing-steps">
+          <div class="step active" id="step1">
+            <i class="fas fa-upload"></i>
+            <span>File uploaded successfully</span>
+          </div>
+          <div class="step" id="step2">
+            <i class="fas fa-search"></i>
+            <span>Searching for CPEs</span>
+          </div>
+          <div class="step" id="step3">
+            <i class="fas fa-bug"></i>
+            <span>Searching for CVEs</span>
+          </div>
+          <div class="step" id="step4">
+            <i class="fas fa-chart-line"></i>
+            <span>Adding EPSS scores</span>
+          </div>
+          <div class="step" id="step5">
+            <i class="fas fa-check"></i>
+            <span>Processing complete</span>
+          </div>
+        </div>
+        
+        <div class="processing-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+          </div>
+          <span class="progress-text" id="progressText">0%</span>
+        </div>
+        
+        <p class="processing-note">
+          This process may take a few minutes depending on the number of applications.
+          <br>
+          <strong>Please do not close this window.</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/processing.js"></script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get Started - VulnCast</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.css" rel="stylesheet">
+</head>
+<body>
+  <div class="page-center">
+    <div class="page-card">
+      <div class="brand">
+        <i class="fas fa-shield-alt"></i>
+        <span>VulnCast</span>
+      </div>
+      <p class="brand-sub">Enterprise Security Intelligence</p>
+
+      <h2>Welcome!</h2>
+
+      <% if (user) { %>
+        <p class="greeting">Signed in as <strong><%= user.username || user.email || 'User' %></strong></p>
+      <% } %>
+
+      <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 0.5rem;">
+        Upload your Microsoft Intune CSV export to get started with vulnerability analysis.
+      </p>
+
+      <div class="upload-zone" id="uploadZone">
+        <i class="fas fa-cloud-upload-alt icon"></i>
+        <h3>Drop your Intune CSV here</h3>
+        <p>or <span class="browse-link">browse files</span> to upload</p>
+        <input type="file" id="fileInput" accept=".csv" hidden />
+      </div>
+
+      <div class="upload-status" id="uploadStatus"></div>
+
+      <div class="upload-progress" id="uploadProgress">
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.78rem;" id="progressLabel">Uploading...</p>
+      </div>
+
+      <div class="info-chips">
+        <div class="info-chip">
+          <i class="fas fa-file-csv"></i> CSV format
+        </div>
+        <div class="info-chip">
+          <i class="fas fa-lock"></i> Stored securely in S3
+        </div>
+        <div class="info-chip">
+          <i class="fas fa-bolt"></i> Auto-enriched with CVEs
+        </div>
+      </div>
+
+      <a href="/logout" class="logout-link"><i class="fas fa-sign-out-alt"></i> Sign out</a>
+    </div>
+  </div>
+
+  <script>
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('fileInput');
+    const statusEl = document.getElementById('uploadStatus');
+    const progressEl = document.getElementById('uploadProgress');
+    const progressFill = document.getElementById('progressFill');
+    const progressLabel = document.getElementById('progressLabel');
+
+    uploadZone.addEventListener('click', () => fileInput.click());
+
+    uploadZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadZone.classList.add('dragover');
+    });
+    uploadZone.addEventListener('dragleave', () => {
+      uploadZone.classList.remove('dragover');
+    });
+    uploadZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) {
+        handleFile(fileInput.files[0]);
+      }
+    });
+
+    async function handleFile(file) {
+      if (!file.name.toLowerCase().endsWith('.csv')) {
+        statusEl.className = 'upload-status error';
+        statusEl.textContent = 'Please upload a CSV file.';
+        return;
+      }
+
+      statusEl.className = 'upload-status uploading';
+      statusEl.textContent = `Uploading: ${file.name}...`;
+      progressEl.classList.add('active');
+      progressFill.style.width = '30%';
+      progressLabel.textContent = 'Uploading to cloud...';
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          progressFill.style.width = '60%';
+          progressLabel.textContent = 'Schema generated. Starting enrichment...';
+          statusEl.className = 'upload-status success';
+          statusEl.textContent = `Uploaded: ${file.name} (Type: ${data.detectedType})`;
+
+          if (data.schemaKey) {
+            progressFill.style.width = '80%';
+            progressLabel.textContent = 'Starting CVE enrichment...';
+
+            const enrichRes = await fetch('/api/start-enrichment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ schemaKey: data.schemaKey }),
+            });
+
+            if (enrichRes.ok) {
+              progressFill.style.width = '100%';
+              progressLabel.textContent = 'Processing started! Redirecting...';
+              setTimeout(() => {
+                window.location.href = `/processing?schemaKey=${encodeURIComponent(data.schemaKey)}`;
+              }, 1000);
+            } else {
+              progressFill.style.width = '100%';
+              progressLabel.textContent = 'Data uploaded. Redirecting to dashboard...';
+              setTimeout(() => { window.location.href = '/dashboard'; }, 1500);
+            }
+          } else {
+            progressFill.style.width = '100%';
+            progressLabel.textContent = 'Done! Redirecting to dashboard...';
+            setTimeout(() => { window.location.href = '/dashboard'; }, 1500);
+          }
+        } else {
+          progressEl.classList.remove('active');
+          statusEl.className = 'upload-status error';
+          statusEl.textContent = `Error: ${data.error}`;
+        }
+      } catch (err) {
+        console.error(err);
+        progressEl.classList.remove('active');
+        statusEl.className = 'upload-status error';
+        statusEl.textContent = 'Upload failed. Please try again.';
+      }
+    }
+  </script>
+</body>
+</html>

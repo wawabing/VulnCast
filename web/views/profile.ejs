@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile - VulnCast</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.css" rel="stylesheet">
+</head>
+<body>
+  <div class="dashboard-container">
+    <%- include('partials/sidebar', { activeNav: 'profile' }) %>
+
+    <main class="dashboard-main">
+      <header class="dashboard-header">
+        <h1><i class="fas fa-user-circle"></i> Profile</h1>
+      </header>
+
+      <div class="profile-content">
+        <!-- User Info Card -->
+        <div class="profile-card">
+          <div class="profile-card-header">
+            <i class="fas fa-id-badge"></i>
+            <h2>Account Details</h2>
+          </div>
+          <div class="profile-details">
+            <% if (user) { %>
+              <div class="profile-detail-row">
+                <span class="profile-label">Username</span>
+                <span class="profile-value"><%= user.username || '—' %></span>
+              </div>
+              <div class="profile-detail-row">
+                <span class="profile-label">Email</span>
+                <span class="profile-value"><%= user.email || '—' %></span>
+              </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Intune Data Card -->
+        <div class="profile-card">
+          <div class="profile-card-header">
+            <i class="fas fa-file-csv"></i>
+            <h2>Intune Export Data</h2>
+          </div>
+
+          <div class="profile-data-info" id="currentDataInfo">
+            <div class="profile-data-loading">
+              <div class="forecast-loading-spinner"></div>
+              <p>Loading current data info...</p>
+            </div>
+          </div>
+
+          <div class="profile-upload-section">
+            <p class="profile-upload-hint">
+              Upload a new Microsoft Intune CSV export to replace your current data. This will re-process and re-enrich your organisation's software inventory.
+            </p>
+
+            <div class="profile-upload-zone" id="profileUploadZone">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <h3>Drop your new Intune CSV here</h3>
+              <p>or <span class="browse-link">browse files</span> to upload</p>
+              <input type="file" id="profileFileInput" accept=".csv" hidden />
+              <span class="profile-selected-file" id="profileSelectedFile"></span>
+            </div>
+
+            <div class="profile-upload-actions" id="profileUploadActions" style="display:none;">
+              <button class="btn btn-primary" id="profileUploadBtn">
+                <i class="fas fa-upload"></i> Upload &amp; Replace Data
+              </button>
+              <button class="btn btn-secondary" id="profileCancelBtn">Cancel</button>
+            </div>
+
+            <div class="profile-upload-progress" id="profileUploadProgress" style="display:none;">
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="profileProgressFill"></div>
+              </div>
+              <p class="profile-progress-label" id="profileProgressLabel">Uploading...</p>
+            </div>
+
+            <div class="profile-upload-status" id="profileUploadStatus"></div>
+          </div>
+        </div>
+
+        <!-- Forecast Banner (hidden until triggered) -->
+        <div class="profile-card profile-forecast-banner" id="forecastBanner" style="display:none;">
+          <div class="profile-card-header">
+            <i class="fas fa-chart-line"></i>
+            <h2>Forecast Update Running</h2>
+          </div>
+          <p class="profile-forecast-msg">
+            The ARIMA forecast models are now running against your updated CPE data.
+            This typically takes a few minutes. Once complete, updated predictions will be
+            available on the <a href="/forecast">Forecast</a> page.
+          </p>
+          <div class="profile-forecast-indicator">
+            <div class="forecast-loading-spinner"></div>
+            <span>Processing in the background...</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/profile.js"></script>
+</body>
+</html>

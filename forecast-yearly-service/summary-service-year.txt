@@ -1,0 +1,37 @@
+Forecast Yearly Service — Summary for Dissertation
+Purpose
+This is a serverless microservice that predicts the total number of CVEs (Common Vulnerabilities and Exposures) that will be published in a given year (defaulting to 2026). It runs as an AWS Lambda function, triggered daily by EventBridge, and writes its forecast results to a DynamoDB table where a frontend or other services can consume them.
+
+In the context of the wider project, this service is one piece of a vulnerability forecasting platform. It sits alongside a sibling CPE forecast service (they share an S3 NVD data cache), and its DynamoDB output feeds a dashboard or reporting layer. The CI/CD pipeline uses AWS CodeBuild to build a Docker image and push it to ECR, meaning the whole thing is deployed as a container-based Lambda.
+
+How It Works (Pipeline Flow)
+Data Acquisition — The nvd_downloader module fetches the full NVD dataset (a JSONL file of all CVEs). It uses S3 as a daily cache layer — if the cached file is less than 24 hours old, it skips the download from the source URL. This is a nice cost/performance optimisation that avoids hammering the upstream data source on every run.
+
+Monthly Time Series Construction — Raw CVE records are parsed, rejected CVEs are filtered out, and the data is aggregated into a monthly count series from 2017 onwards. The series is zero-filled so there are no gaps.
+
+Feature Engineering — For each month, the engine creates features including lag values (1, 2, 3, 6, 12, and 24-month lookbacks), rolling mean and standard deviation windows (3, 6, 12, 24 months), a linear trend counter, and calendar features (month-of-year, quarter). This gives the model both short-term momentum and long-term seasonal context.
+
+XGBoost Model Training — A regularised XGBoost regressor is trained on the monthly series. The regularisation is deliberately conservative (shallow trees with max_depth=3, low learning rate of 0.05, subsampling at 65%, and both L1/L2 penalties) to prevent overfitting on a relatively small dataset (~100 months of data).
+
+Iterative Multi-Step Forecasting — Rather than predicting all 12 months at once, the model predicts one month at a time and feeds each prediction back as input for the next step. This means the forecast naturally propagates its own momentum forward, which is more realistic than assuming independence between months.
+
+Noteworthy Techniques
+Adaptive Bias Learning — This is the headline technique. The idea is that XGBoost will systematically underpredict because it can't model unmeasurable drivers of CVE growth (the code specifically mentions AI tooling, new attack surfaces, and regulatory changes as examples). The engine measures the model's historical bias by doing retrospective forecasts over the 3 years prior to the target, computing the percentage error each time, and averaging them. This bias correction captures the "direction the world is moving" that the model's features alone can't express.
+
+Ensemble Blending with Growth-Rate Projection — Instead of relying solely on XGBoost, the final forecast blends XGBoost's monthly predictions with a per-month year-over-year growth rate projection. The growth rate isn't a single annual number — it's calculated separately for each calendar month (e.g., "how fast does January's CVE count grow year-over-year?" independently from July's). The blend weight defaults to 55% growth-rate / 45% XGBoost, configurable via environment variable. This is a pragmatic approach that respects both the ML model's pattern recognition and the simple empirical reality of trend growth.
+
+Live Recalibration — As real months of the target year complete, the service uses them. Completed months use actual CVE counts; only remaining months are forecasted. Once 3+ months of actuals are available, it computes a recalibration factor — how far off the ensemble predictions were for those completed months — and applies that correction to the remaining months. The confidence in this correction scales with the number of completed months (using a n/(n+1) damping formula), so a single outlier month doesn't wildly distort the rest of the year.
+
+Honest Backtesting — The service runs a full backtest on the year before the target (e.g., 2025 when forecasting 2026). Crucially, the backtest gets its own independent bias correction calculated for that year, not the target year's bias. This means the backtest accuracy metric is a fair, uncontaminated measure of how well the methodology actually performs.
+
+Accuracy Metrics — For completed months, the service reports per-month prediction vs. actual, overall percentage difference, and Mean Absolute Percentage Error (MAPE). The backtest section reports the same for the prior year. This gives the frontend rich material for confidence indicators and transparency.
+
+Infrastructure & Deployment
+Containerised Python Lambda (Python 3.12 base image from AWS public ECR)
+Deployed via CodeBuild → ECR → Lambda
+S3 shared NVD cache with TTL-based freshness checks
+DynamoDB output with careful type conversion (numpy scalars → Decimal, NaN/Inf → None)
+Environment-variable-driven configuration for all key parameters (table name, region, target year, ensemble weights, growth rate window)
+Memory-conscious: explicit del of large objects, gc.collect(), and /tmp cleanup between invocations — important for Lambda's constrained runtime environment
+In Summary
+This service is effectively a self-correcting, ensemble-based CVE volume forecaster that gets more accurate as the year progresses. It combines machine learning (XGBoost) with statistical trend extrapolation, applies learned bias corrections for unmeasurable growth factors, and recalibrates itself against reality as actual data arrives. The backtest and accuracy metrics provide built-in validation, and the whole thing runs serverlessly with minimal operational overhead.

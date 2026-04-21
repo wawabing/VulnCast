@@ -1,0 +1,25 @@
+# Byte-compiled
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+.dockerignore
+
+# SAM build artifacts
+.aws-sam/
+
+# NVD data (downloaded at runtime)
+nvd.jsonl
+
+# OS
+Thumbs.db
+.DS_Store

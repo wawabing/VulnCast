@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Supply Chain - VulnCast</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="dashboard-container">
+    <%- include('partials/sidebar', { activeNav: 'supply-chain' }) %>
+
+    <main class="dashboard-main">
+      <header class="dashboard-header">
+        <h1><i class="fas fa-link"></i> Supply Chain Coverage</h1>
+        <div class="header-actions">
+          <span class="last-updated" id="lastUpdated">Loading…</span>
+          <button class="refresh-btn" id="refreshBtn" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+        </div>
+      </header>
+
+      <!-- Loading -->
+      <div id="scLoading" class="sc-loading-state">
+        <div class="forecast-loading-spinner"></div>
+        <p>Loading supply chain data…</p>
+      </div>
+
+      <!-- Error -->
+      <div id="scError" class="sc-error-state" style="display:none">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p id="scErrorMsg">Failed to load data.</p>
+        <button class="btn btn-primary" onclick="location.reload()">Retry</button>
+      </div>
+
+      <!-- Empty (no scans yet) -->
+      <div id="scEmpty" class="sc-empty-state" style="display:none">
+        <i class="fas fa-box-open"></i>
+        <h2>No SBOM Scans Yet</h2>
+        <p>Upload a Software Bill of Materials to gain visibility into your application supply chains and discover hidden vulnerabilities.</p>
+        <button class="btn btn-primary" onclick="openSbomModal(event)"><i class="fas fa-upload"></i> Upload Your First SBOM</button>
+      </div>
+
+      <!-- Main Content -->
+      <div id="scContent" style="display:none">
+
+        <!-- ─── Top Summary Cards ────────────────────────────── -->
+        <div class="sc-summary-row">
+          <!-- Coverage Ring -->
+          <div class="sc-card sc-card-coverage">
+            <div class="sc-ring-wrap">
+              <canvas id="coverageRing" width="140" height="140"></canvas>
+              <div class="sc-ring-label">
+                <span class="sc-ring-pct" id="coveragePct">0%</span>
+                <span class="sc-ring-sub">Coverage</span>
+              </div>
+            </div>
+            <div class="sc-coverage-detail">
+              <h3>Supply Chain Coverage</h3>
+              <p class="sc-coverage-desc" id="coverageDesc">—</p>
+              <div class="sc-coverage-legend">
+                <span class="sc-legend-covered"><i class="fas fa-check-circle"></i> <span id="coveredCount">0</span> covered</span>
+                <span class="sc-legend-uncovered"><i class="fas fa-question-circle"></i> <span id="uncoveredCount">0</span> unknown</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Summary stats -->
+          <div class="sc-card sc-card-stat">
+            <i class="fas fa-file-code sc-stat-icon"></i>
+            <div class="sc-stat-body">
+              <span class="sc-stat-value" id="totalScans">0</span>
+              <span class="sc-stat-label">SBOM Scans</span>
+            </div>
+          </div>
+          <div class="sc-card sc-card-stat">
+            <i class="fas fa-puzzle-piece sc-stat-icon"></i>
+            <div class="sc-stat-body">
+              <span class="sc-stat-value" id="totalComponents">0</span>
+              <span class="sc-stat-label">Components</span>
+            </div>
+          </div>
+          <div class="sc-card sc-card-stat">
+            <i class="fas fa-bug sc-stat-icon"></i>
+            <div class="sc-stat-body">
+              <span class="sc-stat-value" id="totalVulns">0</span>
+              <span class="sc-stat-label">Vulnerabilities</span>
+            </div>
+          </div>
+          <div class="sc-card sc-card-stat sc-card-stat-critical">
+            <i class="fas fa-radiation sc-stat-icon"></i>
+            <div class="sc-stat-body">
+              <span class="sc-stat-value" id="criticalVulns">0</span>
+              <span class="sc-stat-label">Critical / High</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── Application Coverage Grid ────────────────────── -->
+        <section class="sc-section">
+          <div class="sc-section-header">
+            <h2><i class="fas fa-th-large"></i> Application Coverage</h2>
+            <p class="sc-section-sub">Each application in your estate. Green = SBOM analysed. Grey = unknown supply chain.</p>
+            <div class="sc-filter-bar">
+              <input type="text" id="appSearch" class="sc-search" placeholder="Filter applications…">
+              <select id="appFilter" class="sc-select">
+                <option value="all">All</option>
+                <option value="covered">Covered</option>
+                <option value="uncovered">Unknown</option>
+              </select>
+            </div>
+          </div>
+          <div class="sc-app-grid" id="appGrid">
+            <!-- JS-rendered -->
+          </div>
+        </section>
+
+        <!-- ─── Scan History ────────────────────────────────── -->
+        <section class="sc-section">
+          <div class="sc-section-header">
+            <h2><i class="fas fa-history"></i> Scan History</h2>
+            <button class="btn btn-primary btn-sm" onclick="openSbomModal(event)"><i class="fas fa-plus"></i> New Scan</button>
+          </div>
+          <div class="sc-scan-list" id="scanList">
+            <!-- JS-rendered -->
+          </div>
+        </section>
+      </div>
+
+      <!-- ─── Scan Detail Modal ──────────────────────────── -->
+      <div class="modal-overlay" id="scanDetailModal">
+        <div class="modal-content modal-lg">
+          <div class="modal-header">
+            <h2><i class="fas fa-search"></i> Scan Results</h2>
+            <button class="modal-close" onclick="closeScanModal()">&times;</button>
+          </div>
+          <div class="modal-body" id="scanDetailBody">
+            <!-- JS-rendered -->
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="/js/supply-chain.js"></script>
+</body>
+</html>

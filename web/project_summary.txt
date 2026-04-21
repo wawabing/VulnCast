@@ -1,0 +1,263 @@
+PROJECT SUMMARY
+===============
+
+Title: Proactive Vulnerability Management — Automating CVE Tracking and Forecasting for Modern Organisations
+Author: Owen Reid (2201368) — BSc Ethical Hacking Dissertation
+
+
+WHAT IS THIS PROJECT?
+---------------------
+
+This project is a web-based security tool designed to help organisations automatically track and forecast software vulnerabilities that are relevant to them. The core problem it addresses is that every year the number of published software vulnerabilities (CVEs) keeps growing — from around 1,400 in 2000 to over 40,000 in 2024 — and organisations simply cannot keep up manually. Many organisations know they are vulnerable but lack the tools to filter the huge volume of CVE data down to what actually matters to their specific software estate.
+
+This tool bridges that gap. It takes an organisation's list of software (imported from Microsoft Intune CSV exports or SBOM files), automatically searches vulnerability databases to find which known exploits affect their specific products, scores the risk of each vulnerability, and then forecasts how many new vulnerabilities are expected in the future. The goal is to shift organisations from a reactive approach (fixing things after they break) to a proactive one (anticipating and preparing for future risks).
+
+
+HOW DOES IT WORK (HIGH LEVEL)?
+-------------------------------
+
+1. UPLOAD YOUR SOFTWARE LIST
+   An organisation uploads a CSV file exported from Microsoft Intune (a device management tool). This file contains a list of all the devices, users, and software applications used across the organisation. The tool parses this into a structured profile.
+
+2. AUTOMATIC VULNERABILITY SEARCH
+   The tool takes each application from the uploaded data and searches the National Vulnerability Database (NVD) to find a matching product identifier (called a CPE). Once matched, it retrieves all known vulnerabilities (CVEs) for that product. Each vulnerability is then scored using the Exploit Prediction Scoring System (EPSS), which estimates the probability of a vulnerability being exploited in the next 30 days.
+
+3. RISK SCORING
+   The tool calculates an overall Organisation Risk Score (0–100) based on the severity of each vulnerability (CVSS score), how likely it is to be exploited (EPSS score), and how many devices are affected (blast radius). This gives the organisation a single, easy-to-understand number representing their current security posture.
+
+4. VULNERABILITY FORECASTING
+   Using ARIMA time-series forecasting models (run automatically in the cloud via AWS Lambda), the tool predicts how many new CVEs are expected for each software product in the coming year. It also provides an overall annual CVE forecast. This lets organisations see not just where they stand today, but where they are headed — and plan accordingly.
+
+5. SUPPLY CHAIN SCANNING
+   Users can upload Software Bill of Materials (SBOM) files — standardised documents that list all the components and dependencies within a piece of software. The tool scans these against the OSV (Open Source Vulnerabilities) database to identify vulnerable components in their software supply chain.
+
+
+WHAT PAGES / FEATURES DOES IT HAVE?
+------------------------------------
+
+- ONBOARDING: A simple drag-and-drop page where new users upload their Intune CSV file for the first time.
+
+- PROCESSING: A real-time progress screen showing the enrichment pipeline working through the data (CPE search, CVE search, EPSS scoring).
+
+- DASHBOARD: The main landing page — an executive-level overview showing:
+    • Organisation Risk Score (gauge from 0–100)
+    • Key metrics: critical vulnerabilities, exploit-likely count, assets exposed, vulnerable apps
+    • Risk Trajectory: an 18-month chart showing current risk and projected future risk
+    • What-If Patching Simulator: lets users select applications and see how much their risk would drop if they patched them
+    • Patching Recommendations: the top 8 applications to patch for maximum risk reduction
+    • Risk breakdowns by application, by user, and by severity
+    • Most exploitable vulnerabilities ranked by EPSS score
+
+- FORECAST: Dedicated forecasting page showing:
+    • Predicted total CVEs for the current year with growth percentage
+    • Backtest accuracy (how well last year's prediction matched reality)
+    • Annual CVE totals bar chart (historical years plus the forecast year)
+    • Monthly trend and forecast line chart
+    • Per-product forecasts: for each tracked software product, shows predicted CVEs, actual CVEs, percentage change, and model accuracy
+    • Detailed modal per product with historical charts and accuracy metrics
+
+- VULNERABILITIES: A searchable, sortable table of every CVE affecting the organisation's software, showing severity, CVSS score, EPSS exploit probability, and descriptions.
+
+- APPLICATIONS: The full software inventory with CVE counts, severity breakdowns, and the ability to re-run enrichment.
+
+- DEVICES: Table of all devices from the Intune import (device name, platform, OS version, assigned user).
+
+- USERS: Table of all users from the Intune import (username, email, device count).
+
+- SUPPLY CHAIN: SBOM-based supply chain visibility showing scan coverage, component counts, vulnerabilities found, and detailed scan results per application.
+
+
+WHAT CLOUD SERVICES DOES IT USE?
+---------------------------------
+
+- AWS Cognito: Handles user login and authentication
+- AWS S3: Stores uploaded files, processed schemas, and SBOM scan results
+- AWS DynamoDB: Stores the forecasting results and tracked product identifiers
+- AWS Lambda: Runs the ARIMA forecasting models automatically in the cloud
+
+
+WHAT EXTERNAL DATA SOURCES DOES IT USE?
+----------------------------------------
+
+- National Vulnerability Database (NVD): For finding matching product identifiers (CPEs) and retrieving known vulnerabilities (CVEs) with CVSS severity scores
+- FIRST.org EPSS API: For exploit probability scores — the likelihood a vulnerability will be exploited in the next 30 days
+- OSV.dev: For scanning open-source software components in SBOMs against known vulnerabilities
+
+
+DATASET STRUCTURE — HOW CVEs AND CPEs ARE STORED
+-------------------------------------------------
+
+The project uses a combination of AWS S3 (file storage) and AWS DynamoDB (database tables):
+
+S3 Storage (JSON files, per user):
+  - Raw CSV uploads:        s3://bucket/uploads/{userSub}/{timestamp}-{filename}.csv
+  - Parsed schema:          s3://bucket/schemas/{userSub}/{timestamp}-{filename}.json
+  - Enriched schema:        s3://bucket/schemas/{userSub}/{timestamp}-{filename}-enriched.json
+  - SBOM scan results:      s3://bucket/sbom/{userSub}/results/{scanId}.json
+  - SBOM manifest:          s3://bucket/sbom/{userSub}/manifest.json
+
+The parsed schema JSON has this structure:
+  { type, org: { org_id, org_name },
+    users: [{ user_id, username, email_address, org_id }],
+    devices: [{ device_id, device_name, os_description, os_version, platform, user_id }],
+    applications: [{ application_key, application_name, application_publisher,
+                     application_short_version, application_version,
+                     device_ids: [...], platforms: [...] }],
+    Platforms: [{ platform_name, platform_device_count }] }
+
+After enrichment, each application gains a cve_data object:
+  { cpe_name: "cpe:2.3:a:vendor:product:...",
+    vendor: "autodesk",
+    product: "autocad",
+    cves: [{ cve_id: "CVE-2023-...", description: "...",
+             severity: "HIGH", score: 7.8,
+             epss_score: 0.00077, epss_percentile: 0.23129 }] }
+
+DynamoDB Tables:
+  1. "forecast-cpes" — Tracks CPEs discovered during enrichment
+     - Partition key: cpe (full CPE 2.3 URI string)
+     - Attributes: vendor, product, version, app_name, added_by, added_at, updated_at
+
+  2. "cpe-forecast-results" — Stores per-CPE ARIMA forecast outputs (written by Lambda)
+     - Partition key: cpe
+     - Attributes: status (success/failed), vendor, product, model, granularity,
+       forecast_year, forecast_total, forecast_periods (array of {date, predicted}),
+       forecast_periods_mape_optimised, historical_yearly (array of {year, cve_count}),
+       backtest_actual_total, backtest_diff_pct, backtest_mape,
+       backtest_annual_periods, backtest_shortterm_periods,
+       train_periods, test_periods, mae, rmse,
+       bias_correction_pct, last_forecast_epoch, last_forecast_iso, error
+
+  3. "forecast-cve-yearly" — Stores the global yearly CVE forecast
+     - Partition key: year (e.g. "2026")
+     - Attributes: status, model, target_year, forecast_total,
+       projected_growth_pct, historical_yearly, historical_monthly,
+       forecast_monthly (array of {month, predicted, is_actual, actual}),
+       actual_months_count, actual_months_total, forecasted_months_count, forecasted_months_total,
+       backtest: { year, actual_total, forecast_total, diff_pct, monthly: [{month, actual, predicted}] },
+       bias_correction_pct, last_forecast_epoch, last_forecast_iso
+
+
+HOW THE FORECASTING WORKS
+--------------------------
+
+The forecasting is powered by ARIMA (AutoRegressive Integrated Moving Average) time-series models, run automatically via AWS Lambda functions that are external to the web application itself. The pipeline works as follows:
+
+1. When a user uploads data and enrichment runs, discovered CPEs are pushed to the "forecast-cpes" DynamoDB table.
+
+2. An AWS Lambda function (scheduled or triggered) reads the CPEs from that table, queries the NVD for historical CVE counts per CPE, and fits ARIMA models to each CPE's time series.
+
+3. The Lambda writes the forecast results back to the "cpe-forecast-results" DynamoDB table, one item per CPE.
+
+4. A separate yearly forecast is generated for overall global CVE counts and stored in "forecast-cve-yearly".
+
+Forecasting operates at TWO levels:
+  - GLOBAL (yearly total CVE counts): Predicts how many total CVEs will be published across all software in a given year. Shows historical annual totals, a monthly trend chart with actual vs forecast, and a year progress bar showing how many months have actual data vs forecasted.
+  
+  - PER-CPE (product-level): Each individual software product (identified by its CPE string) gets its own ARIMA forecast. This predicts how many CVEs that specific product will see in the coming year. This is the key innovation — it gives organisations a tailored view of their specific future risk per product.
+
+Granularity:
+  The Lambda determines the best granularity for each CPE based on data availability. The frontend supports displaying forecasts at monthly, weekly, or quarterly granularity. Each CPE card shows its granularity.
+
+Model Optimisation:
+  Two optimisation strategies are used in parallel:
+  - Diff%-optimised: Minimises the percentage difference between predicted and actual annual totals
+  - MAPE-optimised: Minimises Mean Absolute Percentage Error across individual periods
+  Both sets of forecast periods are stored and can be compared in the per-CPE detail modal.
+
+Bias Correction:
+  The model applies a bias correction percentage to adjust systematic over/under-prediction, which is displayed in the metadata bar.
+
+Backtesting:
+  Every forecast includes a backtest against the prior year (e.g., the 2026 forecast includes a backtest against 2025). The backtest compares what the model would have predicted for 2025 vs what actually happened, giving a measure of model reliability. Backtest metrics include: actual total, forecast total, diff%, monthly predicted vs actual breakdowns.
+
+
+INTERESTING DISCOVERIES — SPARSITY, FORECASTABILITY, AND FAILURE HANDLING
+--------------------------------------------------------------------------
+
+Not all products are forecastable. The system explicitly tracks "successful" vs "failed" forecasts:
+  - Some products have too few historical CVEs to build a reliable time series (data sparsity). These are marked as "failed" and displayed in a separate Failed Forecasts table with the error reason.
+  - Products with dense CVE histories (e.g., Google Chrome, Microsoft Edge) produce more reliable forecasts, while niche/small products often fail or produce low-confidence results.
+  - The system categorises forecast confidence as High (MAPE < 20%), Medium (MAPE 20–50%), or Low (MAPE > 50%).
+
+The dashboard handles missing forecasts gracefully: for applications without a per-CPE forecast (either failed or not yet processed), the risk trajectory chart falls back to an aggregate growth rate derived from the overall predicted/actual ratio.
+
+
+ARCHITECTURE OF THE ARTEFACT
+------------------------------
+
+The system follows a pipeline architecture with these layers:
+
+1. DATA INGESTION LAYER
+   - CSV Upload: Microsoft Intune CSV exports (two formats: IntuneRaw per-device rows, IntuneAggregate summary rows)
+   - SBOM Upload: CycloneDX 1.3–1.6 and SPDX 2.2/3.0 JSON formats
+   - Both are parsed into a canonical JSON schema
+
+2. ENRICHMENT LAYER (server-side pipeline)
+   - Step 1: Parse uploaded data into structured JSON schema
+   - Step 2: For each application, search NVD API for a matching CPE (using weighted scoring of name/version/publisher)
+   - Step 3: Fetch all CVEs for the matched CPE from NVD
+   - Step 4: Enrich each CVE with EPSS exploit probability scores from FIRST.org
+   - Step 5: Save enriched schema to S3, push CPEs to DynamoDB for forecasting
+   - For SBOMs: components are scanned against OSV.dev using PURL, SHA-256 hash, or name+version+ecosystem
+
+3. FORECASTING LAYER (external AWS Lambda)
+   - Reads tracked CPEs from DynamoDB
+   - Queries NVD historical data
+   - Fits ARIMA models per CPE
+   - Writes forecast results (with backtest metrics) back to DynamoDB
+   - Also produces a global yearly CVE forecast
+
+4. RISK COMPUTATION LAYER (client-side)
+   - Runs entirely in the browser using the enriched schema + forecast data
+   - Risk formula: CVE_Risk = CVSS x EPSS x 100 x BlastRadius
+   - BlastRadius = 1 + ln(devices_affected) / ln(total_devices), giving a 1–2 range
+   - App_Risk = sum of all CVE_Risk for that app
+   - Org_Risk = normalised 0–100 using a saturating exponential curve
+   - Risk trajectory uses per-CPE forecast growth rates to project 18 months ahead
+
+5. PRESENTATION LAYER (EJS templates + Chart.js)
+   - Server-rendered EJS templates with client-side JavaScript
+   - Chart.js for all visualisations (gauges, bar charts, line charts, donuts, stacked area)
+   - Real-time progress via SSE (Server-Sent Events) for SBOM scanning and polling for enrichment progress
+
+6. AUTHENTICATION & STORAGE
+   - AWS Cognito (OIDC) for user authentication
+   - AWS S3 for all file/schema storage
+   - AWS DynamoDB for forecast data and CPE tracking
+   - Express.js sessions for user state
+
+Infrastructure: Node.js/Express backend, EJS templating, hosted on AWS.
+
+
+EVALUATION APPROACH
+--------------------
+
+The artefact is evaluated by:
+1. Simulating a synthetic organisation (50 users, 50 devices, multiple applications including AutoCAD, Revit, Slack, Bluebeam Revu, etc.) using a generated Intune CSV
+2. Running the full pipeline: upload → enrichment → CVE discovery → forecasting
+3. Comparing artefact outputs to manual vulnerability searching to measure time savings and accuracy
+4. Backtest accuracy: for each CPE forecast, comparing predicted 2025 CVE counts to actual 2025 counts using metrics like MAPE, MAE, RMSE, and Diff%
+5. For the yearly global forecast: comparing predicted monthly totals to actual monthly totals as the year progresses
+6. Assessing the actionability of insights: whether the dashboard recommendations lead to meaningful risk reduction
+
+The backtest results are baked into the tool itself — every forecast card shows its backtest accuracy, and the yearly forecast shows actual vs predicted with per-month breakdowns and error percentages, colour-coded as good (<5% error), warning (5–15%), or bad (>15%).
+
+
+DIAGRAMS THAT COULD BE INCLUDED
+---------------------------------
+
+Based on the artefact structure, useful diagrams would include:
+1. End-to-end pipeline flow: CSV/SBOM upload → parsing → NVD CPE matching → CVE fetching → EPSS enrichment → S3 storage → DynamoDB → Lambda ARIMA → Dashboard
+2. System architecture diagram: showing the web app, S3, DynamoDB, Lambda, Cognito, NVD API, EPSS API, OSV API and how they connect
+3. Risk model formula diagram: showing how CVSS, EPSS, and BlastRadius combine into per-CVE, per-app, and org-level risk scores
+4. Data flow diagram: showing the canonical schema structure and how it transforms from raw CSV → parsed schema → enriched schema
+5. Dashboard screenshots: the risk gauge, risk trajectory chart, what-if patching simulator, forecast cards, yearly forecast charts, backtest comparison charts
+6. Forecasting pipeline: CPE discovery → NVD historical query → ARIMA model fitting → backtest validation → forecast output → DynamoDB → dashboard consumption
+7. SBOM scanning flow: SBOM upload → format detection → component parsing → OSV query (PURL/hash/name) → vulnerability results → coverage metrics
+
+
+IN SUMMARY
+----------
+
+This tool automates the entire vulnerability management workflow: from ingesting an organisation's software inventory, through identifying relevant vulnerabilities, scoring risk, and forecasting future exposure. It provides actionable insights through an intuitive dashboard, helping IT and security teams prioritise what to patch and plan ahead rather than constantly reacting to new threats.

@@ -1,0 +1,109 @@
+Proactive Vulnerability Management: 
+Automating CVE Tracking and 
+Forecasting for Modern Organisations
+
+Owen Reid - 2201368
+BSc Ethical Hacking
+
+
+ 
+ABSTRACT
+Context: Year on year, the number of software vulnerabilities published continues to increase, making it progressively more difficult for organisations to identify and prioritise exploits that pose a genuine risk to their systems. Originally, organisations only utilised a small range of software and dealt with a manageable amount of known vulnerabilities. However, modern operations rely on intricate supply chains made of a range of different third-party vendors. This interconnectedness and influx of numerous external dependencies has caused organisations to become overwhelmed by the volume of data they need to filter in order to find exploits relevant to their specific dependencies. Automation and forecasting have the potential to provide organisations with relevant data and could allow them to become proactive in their approach to vulnerability management.
+
+Aim: The aim of this project is to develop an intuitive and accessible artefact that automates vulnerability management through real-time tracking of relevant software components and forecasted counts of Common Vulnerabilities and Exposures (CVEs). It seeks to empower organisations to move from reactive responses toward proactive measures by providing them with actionable insights.
+
+Method: A thorough research phase will be conducted, it will investigate literature within the vulnerability management field and explore a range of services for hosting the artefact and supporting the exploit searches. Using the information gathered, the artefact will be implemented to uphold industry standards. It will ingest various formats of organisation data in order to establish a software profile, which will then be used to find relevant CPEs and CVEs. The information will then be collated into a dashboard for users to see real-time insights. To evaluate the artefact, it will be tested using a simulated real-world organisation and assessed based on the accuracy, relevance, and responsiveness of the insights it generates compared to traditional manual tracking approaches.
+
+Results: 
+The result of this work will be a functioning artefact that can continuously track and forecast vulnerabilities that are relevant to an organisation’s specific software components. By providing actionable insights into current and predicted vulnerabilities it is expected to support IT and security teams in streamlining their vulnerability management workflows and enhancing risk prioritisation.
+
+Conclusion: To conclude, as exploit publications continue to rise, it is imperative that organisations adopt automation for vulnerability management. This project seeks to empower organisations to utilise the abundance of vulnerability data in order to move from reactive patch maintenance to proactive risk management.    
+
+Keywords 
+KA1 – Risk Management and Governance
+KA8 – Security Operations and Incident Management
+KA14 – Security Analytics and Monitoring
+
+
+1. INTRODUCTION
+In 1999 the Internet Category of Attack Toolkit (ICAT) was established and was a significant step in developing a standardised platform for software vulnerability information. The publicly-accessible registry stored every known vulnerability in software systems, providing risk scoring, affected products, and patch information. This foundation allowed organisations to identify if any of the systems they used were susceptible to attack, and plan appropriate patch strategies.
+
+ 
+Figure 1 - CVEs Published by Year Growth
+In the year 2000, only 1,438 vulnerabilities were published (CVE, 2025), this scale was viable for organisations to manage with only around 4 new vulnerabilities emerging each day. Along with the fact that at this time organisations hadn’t adopted technology as vastly as today, it made for an efficient vulnerability management workflow. However, in the past 25 years organisations have implemented technology into every operation and in turn the number of vulnerabilities has increased to circa 40,000 in 2024 alone. With this surge, organisations have become overwhelmed with an abundance of CVE data and struggle to filter it to find what information is relevant for their operations. This shows that the data required for sufficient vulnerability management exists, but there is a gap in automation between mapping the list of software relevant to an organisation and viewing a list of relevant CVEs.
+
+Across the vulnerability management ecosystem there are a range of different scoring models, each of which aims to translate technical data into a measurable risk score. The Common Vulnerability Scoring System (CVSS) aims to provide a standardised method of communicating the severity of a vulnerability whereas the Exploit Prediction Scoring System (EPSS) aims to provide a probability score that indicates the chance of a particular vulnerability being exploited in the next 30 days. Both models are useful for general risk assessment, however there are several studies highlighting that these models are not without limitations, as they are too generalised and do not account for an organisation’s software profile or asset context (Koscinski et al., 2023).
+
+In an attempt to address these short-falls, research like the Stakeholder-Specific Vulnerability Categorisation (SSVC) model has been conducted with the aim of creating a more contextual scoring system (Spring, 2019). However, these have not been adopted widely by organisations and remain largely conceptual.
+
+This study aims to develop a tool that provides organisations with an easy solution to vulnerability management. It does this by enumerating relevant CPEs and CVEs and tracks their current and forecasted amounts. By doing this it seeks to empower organisations to move from reactive responses toward proactive measures by providing them with actionable insights.
+
+There are four key objectives of this project.  The first will be to enumerate a software profile for the organisation, this includes parsing multiple SBOM formats and other methods of software listing into a canonical schema per component. The second objective is then to use this schema to search for a corresponding Common Platform Enumeration (CPE) in a vulnerability database, using all the information available to ensure high confidence. Thirdly, the tool will map the resultant CPEs to a list of CVEs that are relevant to the client software and finally provide tracking of current risks of exploitation and predicted forecast of future risk.
+
+
+2. BACKGROUND
+The deluge of CVE counts in recent years has been a major topic of discussion. Organisations have recently become inundated with CVEs, with 2024 alone seeing a 38% increase over 2023, amounting to 40,077 new publications (CVE, 2025). Although the overall trend of increasing CVE counts provide a high level view of general vulnerability trends, it is crucial that organisations are able to pinpoint exactly what known vulnerabilities are relevant to the systems they use across their operations. This influx has prompted researchers to begin exploring proactive vulnerability measures such as forecasting CVE counts (Leverett, 2022).
+
+The increasing risk prompted a response from regulatory bodies all over the world. In 2021 the US government issued a mandate that ensured that federal agencies obtained SBOM files for all software they used (NIST, 2021). Following suit, the European Union introduced the EU Cyber Resilience Act (European Commission, 2025) further showing the collective understanding that SBOM files are an effective method of enumerating a full list of an organisations software. SBOMs provide a detailed inventory of all the component parts and dependencies within a given application, helping prevent supply chain attacks where compromise of a third-party vendor grants access to the primary organisation.
+
+Building on SBOMs as an industry standard, integration with historical CVE data would allow an organisation to track all vulnerabilities for the software relevant to their operations. Additionally, a forecasting model that predicts future CVE counts could be used to show an organisation their projected risk and provide a dashboard for their quantified risk profile using predictive models like the Exploit Prediction Scoring System (EPSS). By doing this, SBOM mapping transforms into a foundation for forecasting and prioritising future security risks, allowing organisations to move beyond reactive patch management toward proactive risk quantification.
+
+It was revealed in a study published by BitSight that out of 1.4 million organisations worldwide, one third of them had at least one known vulnerability (Edwards, 2024), meaning that they were susceptible to attack by a known exploit. 
+
+Despite the aforementioned mandates and predictive frameworks, it is clear that organisations remain unable to operationalise this data, creating a clear need for automated, predictive solutions. A study conducted by the Ponemon Institute and Contrast Security concluded that 43% of organisations claim a “lack of effective tools” as the main cause of unresolved vulnerability backlogs (Ponemon, 2022), highlighting the gap between data availability and operational use. To address this gap, the artefact developed in this paper aims to translate organisation SBOMs into actionable vulnerability insights, allowing organisations to view a profile of their current and future risk of exploitability.
+
+
+3. PROJECT ARTEFACT
+The artefact developed in this project is a software tool that automates vulnerability tracking on an organisation-specific level by ingesting their interested software through methods such as SBOM files and mapping these to vulnerability databases in order to enumerate a list of relevant CPEs and CVEs in real time, which is then used to populate a unique vulnerability risk profile.
+
+The issue that this artefact addresses is the lack of tools organisations can access to help them manage vulnerabilities, and with recent and forecasted CVE growth this issue is only going to get more prominent, and therefore more important to resolve. The artefact aims to solve this by automating vulnerability management and providing specific, actionable insights.
+
+
+ 
+Figure 2 - Speculated Artefact Workflow
+The artefact will first establish a software component profile for the organisation by ingesting information through an array of different methods such as SBOM files, Excel Sheets and plain text. Following this, the artefact will parse these sources into a canonical schema that can be used to search for a corresponding CPE in a vulnerability database. Using the identified CPE item a list of known vulnerabilities will be retrieved and used in an ensemble of models such as EPSS and CVSS to show the organisation’s current risk.
+The software profile will also be used to draw relevant information from a centralised CVE forecasting model, giving the organisation a tailored view of their unique future risk profile. The artefact will portray this information to the user through an intuitive website dashboard.
+
+
+4. METHOD
+4.1 Research
+The first stage of this project will be the research phase. This phase will begin with a comprehensive literature review, followed by detailed review of relevant articles from legitimate sources. By doing so it will ensure that the artefact created is backed by research and uses the best practices.
+ 
+A number of different serverless cloud platform such as Amazon Web Services (AWS) and Google Cloud Platform (GCP) will be researched for their efficacy of hosting this artefact, with a number of factors like cost and usability taken in to account. 
+
+Additionally, a range of vulnerability databases will be evaluated in order to find the best candidate, taking into account factors such as rate limits, accuracy of data, and whether it can support continuous vulnerability tracking at scale.
+
+4.2 Implementation
+The second stage of this project will be the implementation phase. Following from the previous stage which built a foundation of knowledge around best practices, this phase aims to use them to build the artefact.
+
+The first component that will be implemented is the user information ingestion tool, the objective of this tool is to be able to consume the organisation’s software list through a range of formats whether it is an SBOM file or just plain text. The tool will take this data and parse it into a canonical schema to be used for vulnerability database searching purposes, resulting in a list of known vulnerabilities that the organisation’s software is susceptible to.
+
+The second component will be the tracking of relevant CPEs and integration with existing scoring models like EPSS and CVSS in order to calculate a risk profile for the organisation. Additionally, the artefact will control a central CVE forecasting model that organisations can use to forecast which software components are predicted to have increased CVE counts in the future. 
+
+Finally, the third component is presentation layer where the artefact aims to display all of the information to the organisation. This will come in the form of a web application hosted in the cloud which will contain an intuitive dashboard to allow the organisation to view a list of current exploits they are vulnerable to, their quantified risk profile, and recommended mitigations.
+
+4.3 Evaluation
+This final stage will involve simulating a synthetic organisation’s software profile and monitoring how the artefact handles ingesting, processing, and displaying the information. The outcomes of this will be compared to a human performing all the searching manually in order to observe the true benefit provided by the artefact. A list of actionable insights will look to be retrieved from the application and the accuracy of these will attest to the success of the tool, as the better actions an organisation takes from viewing this tool’s dashboard, the more successful the artefact will be in achieving its objective. Additionally, other factors such as optimisation and cost-lowering will be evaluated within their respective cloud architectures.
+
+
+5. SUMMARY
+In summary, this project will develop an easy-to-use tool for predictive vulnerability intelligence, enabling organisations to automate and forecast their cyber risk. It will focus specifically on the organisation’s relevant software and derive risk statistics from a central forecasting model. It will do this by ingesting a list of software from the organisation to create a software profile, then use this to map across vulnerability databases to find relevant CPEs and CVEs in order to enumerate a list of vulnerabilities the organisation’s software has.
+
+The artefact will be evaluated with a test case imitating a real-world organisation and will be monitored to ensure that it is optimised, low-cost, and provides the organisation with truly actionable insights that is effective in lowering their risk profile. Overall, the ultimate impact of this artefact is to show that automation and predictive abilities can be integrated to reduce risk exposure and enhance an organisation's resilience to known vulnerabilities.
+
+6. REFERENCES
+CVE (2025) CVE metrics. Available at: https://www.cve.org/about/Metrics
+
+Edwards, B. (2024) Slicing through CISA’s KEV Catalog. Bitsight. Available at: https://www.bitsight.com/resources/slicing-through-cisas-kev-catalog
+
+European Commission (2025) Cyber Resilience Act. Available at: https://digital-strategy.ec.europa.eu/en/library/cyber-resilience-act 
+
+Leverett, É. (2022) ‘Vulnerability Forecasting: Theory and Practice’, Proceedings of the Association for Computing Machinery (ACM). Available at: https://doi.org/10.1145/3492328
+
+NIST (2021) Executive Order 14028: Improving the Nation’s Cybersecurity. Available at: https://www.nist.gov/itl/executive-order-14028-improving-nations-cybersecurity
+
+Ponemon Institute and Contrast Security (2022) State of vulnerability management / vulnerability backlogs. Available at: https://www.contrastsecurity.com/hubfs/Project%20Horizon/Ponemon-Rezilion-Report-Final.pdf
+
+Koscinski, V., Nelson, M., Okutan, A., Falso, R. & Mirakhorli, M. (2025) Conflicting Scores, Confusing Signals: An Empirical Study of Vulnerability Scoring Systems. arXiv. Available at: https://arxiv.org/abs/2508.13644
+
+Spring, J. M., Hatleback, E., Householder, A., Manion, A., & Shick, D. (2021) Prioritizing Vulnerability Response: A Stakeholder-Specific Vulnerability Categorization (SSVC). Software Engineering Institute, Carnegie Mellon University. Available at: https://www.sei.cmu.edu/library/prioritizing-vulnerability-response-a-stakeholder-specific-vulnerability-categorization

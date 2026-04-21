@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In - VulnCast</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.css" rel="stylesheet">
+  <style>
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-page::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at 30% 50%, rgba(255, 107, 53, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(243, 156, 18, 0.06) 0%, transparent 50%);
+      animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-20px, -20px); }
+    }
+
+    .login-card {
+      position: relative;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 3rem;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .login-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 0.5rem;
+    }
+
+    .login-logo i {
+      font-size: 2.5rem;
+      color: var(--primary-color);
+    }
+
+    .login-logo span {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+
+    .login-subtitle {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.95rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .cognito-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+    }
+
+    .cognito-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(255, 107, 53, 0.4);
+    }
+
+    .cognito-btn:active {
+      transform: translateY(0);
+    }
+
+    .cognito-btn i {
+      font-size: 1.2rem;
+    }
+
+    .login-footer {
+      margin-top: 2rem;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 0.8rem;
+    }
+
+    .login-features {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .login-feature {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.8rem;
+    }
+
+    .login-feature i {
+      color: var(--primary-color);
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-logo">
+        <i class="fas fa-shield-alt"></i>
+        <span>VulnCast</span>
+      </div>
+      <p class="login-subtitle">Enterprise Security Intelligence Platform</p>
+
+      <a href="<%= cognitoUrl %>" class="cognito-btn">
+        <i class="fas fa-sign-in-alt"></i>
+        Sign in with AWS Cognito
+      </a>
+
+      <div class="login-features">
+        <div class="login-feature">
+          <i class="fas fa-lock"></i> Secure
+        </div>
+        <div class="login-feature">
+          <i class="fas fa-bolt"></i> Fast
+        </div>
+        <div class="login-feature">
+          <i class="fas fa-shield-alt"></i> Protected
+        </div>
+      </div>
+
+      <div class="login-footer">
+        <p>&copy; 2025 VulnCast. Securing the digital future.</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

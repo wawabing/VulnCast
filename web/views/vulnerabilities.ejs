@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vulnerabilities - VulnCast</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.css" rel="stylesheet">
+</head>
+<body>
+  <div class="dashboard-container">
+    <%- include('partials/sidebar', { activeNav: 'vulnerabilities' }) %>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+      <header class="dashboard-header">
+        <h1>Vulnerability Management</h1>
+        <div class="header-actions">
+          <span class="last-updated" id="lastUpdated">Loading...</span>
+          <button class="refresh-btn" id="refreshBtn">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Vulnerability Summary Cards -->
+      <div class="vulnerability-summary">
+        <div class="summary-card critical">
+          <div class="summary-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-value" id="criticalCount">0</div>
+            <div class="summary-label">Critical</div>
+          </div>
+        </div>
+        
+        <div class="summary-card high">
+          <div class="summary-icon">
+            <i class="fas fa-exclamation-circle"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-value" id="highCount">0</div>
+            <div class="summary-label">High</div>
+          </div>
+        </div>
+        
+        <div class="summary-card medium">
+          <div class="summary-icon">
+            <i class="fas fa-exclamation"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-value" id="mediumCount">0</div>
+            <div class="summary-label">Medium</div>
+          </div>
+        </div>
+        
+        <div class="summary-card low">
+          <div class="summary-icon">
+            <i class="fas fa-info-circle"></i>
+          </div>
+          <div class="summary-content">
+            <div class="summary-value" id="lowCount">0</div>
+            <div class="summary-label">Low</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vulnerabilities Table -->
+      <div class="table-container">
+        <div class="table-header">
+          <h2><i class="fas fa-bug"></i> All Vulnerabilities</h2>
+        </div>
+        
+        <div class="table-wrapper">
+          <table class="data-table" id="vulnerabilitiesTable">
+            <thead>
+              <tr>
+                <th>CVE ID</th>
+                <th>Application</th>
+                <th>Severity</th>
+                <th>CVSS Score</th>
+                <th>EPSS Score</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="vulnerabilitiesTableBody">
+              <tr>
+                <td colspan="7" class="loading-row">Loading vulnerability data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/vulnerabilities.js"></script>
+</body>
+</html>

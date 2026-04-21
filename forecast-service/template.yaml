@@ -1,0 +1,192 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  CPE Forecast Service — runs every 30 minutes, reads CPEs from DynamoDB,
+  downloads NVD data (cached daily in S3), runs ARIMA forecasts, and writes
+  results to DynamoDB.
+
+Globals:
+  Function:
+    Timeout: 900            # 15 minutes (Lambda max)
+    MemorySize: 3008        # 3 GB — needed for pandas + statsmodels + NVD parsing
+    Runtime: python3.11
+
+Parameters:
+  Environment:
+    Type: String
+    Default: prod
+    AllowedValues: [dev, staging, prod]
+  ScheduleRate:
+    Type: String
+    Default: "rate(30 minutes)"
+    Description: EventBridge schedule expression
+  NvdUrl:
+    Type: String
+    Default: "https://nvd.handsonhacking.org/nvd.jsonl"
+  ForecastTtlSec:
+    Type: Number
+    Default: 86400
+    Description: How often to re-forecast each CPE (seconds). 86400 = 24h
+  NvdCacheTtlSec:
+    Type: Number
+    Default: 86400
+    Description: How often to re-download NVD from source URL (seconds). 86400 = 24h
+  DefaultModel:
+    Type: String
+    Default: arima
+    AllowedValues: [arima]
+
+Resources:
+  # ────────────────────────────────────────────────────
+  # DynamoDB Tables
+  # ────────────────────────────────────────────────────
+
+  ForecastCpesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: forecast-cpes
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: cpe
+          AttributeType: S
+      KeySchema:
+        - AttributeName: cpe
+          KeyType: HASH
+      Tags:
+        - Key: Service
+          Value: cpe-forecast
+
+  ForecastResultsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: cpe-forecast-results
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: cpe
+          AttributeType: S
+      KeySchema:
+        - AttributeName: cpe
+          KeyType: HASH
+      Tags:
+        - Key: Service
+          Value: cpe-forecast
+
+  # ────────────────────────────────────────────────────
+  # S3 Bucket (NVD daily cache)
+  # ────────────────────────────────────────────────────
+
+  NvdCacheBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "cpe-forecast-nvd-cache-${AWS::AccountId}"
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireOldNvdFiles
+            Status: Enabled
+            ExpirationInDays: 7     # auto-delete files older than 7 days
+      Tags:
+        - Key: Service
+          Value: cpe-forecast
+
+  # ────────────────────────────────────────────────────
+  # Lambda Function (container image)
+  # ────────────────────────────────────────────────────
+
+  ForecastFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "cpe-forecast-service-${Environment}"
+      PackageType: Image
+      ImageUri: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/cpe-forecast-service:latest"
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 2048              # 2 GB /tmp for the NVD file
+      Environment:
+        Variables:
+          DYNAMO_TABLE_CPES: !Ref ForecastCpesTable
+          DYNAMO_TABLE_RESULTS: !Ref ForecastResultsTable
+          NVD_URL: !Ref NvdUrl
+          NVD_S3_BUCKET: !Ref NvdCacheBucket
+          NVD_S3_KEY: "nvd-cache/nvd.jsonl"
+          NVD_CACHE_TTL_SEC: !Ref NvdCacheTtlSec
+          DEFAULT_MODEL: !Ref DefaultModel
+          FORECAST_TTL_SEC: !Ref ForecastTtlSec
+          LOG_LEVEL: INFO
+          LAMBDA_BUDGET_SEC: "840"
+          PER_CPE_TIMEOUT_SEC: "120"
+          START_YEAR: "2017"
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ForecastCpesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ForecastResultsTable
+        - S3CrudPolicy:
+            BucketName: !Ref NvdCacheBucket
+      Events:
+        ScheduledForecast:
+          Type: Schedule
+          Properties:
+            Schedule: !Ref ScheduleRate
+            Name: !Sub "cpe-forecast-schedule-${Environment}"
+            Description: "Trigger CPE forecast service every 30 minutes"
+            Enabled: true
+    Metadata:
+      DockerTag: latest
+      DockerContext: .
+      Dockerfile: Dockerfile
+
+  # ────────────────────────────────────────────────────
+  # CloudWatch Alarms
+  # ────────────────────────────────────────────────────
+
+  ForecastErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "cpe-forecast-errors-${Environment}"
+      AlarmDescription: "Alert when forecast Lambda has errors"
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref ForecastFunction
+      Statistic: Sum
+      Period: 1800          # 30 minutes (matches schedule)
+      EvaluationPeriods: 2
+      Threshold: 3
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+  ForecastDurationAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "cpe-forecast-duration-${Environment}"
+      AlarmDescription: "Alert when Lambda approaches timeout"
+      Namespace: AWS/Lambda
+      MetricName: Duration
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref ForecastFunction
+      Statistic: Maximum
+      Period: 1800
+      EvaluationPeriods: 1
+      Threshold: 840000     # 840 seconds in ms (our budget)
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+Outputs:
+  ForecastFunctionArn:
+    Description: ARN of the forecast Lambda
+    Value: !GetAtt ForecastFunction.Arn
+
+  CpesTableName:
+    Description: DynamoDB table for input CPEs
+    Value: !Ref ForecastCpesTable
+
+  ResultsTableName:
+    Description: DynamoDB table for forecast results
+    Value: !Ref ForecastResultsTable
+
+  NvdCacheBucketName:
+    Description: S3 bucket for daily NVD cache
+    Value: !Ref NvdCacheBucket

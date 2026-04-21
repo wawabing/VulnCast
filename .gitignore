@@ -1,0 +1,57 @@
+# ─────────────────────────────────────────────
+# Secrets — NEVER commit
+# ─────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ─────────────────────────────────────────────
+# Node (web/)
+# ─────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime caches used by the web app
+web/backend/temp-files/
+web/backend/visual-schemas/
+
+# ─────────────────────────────────────────────
+# Python (forecast-service/, forecast-yearly-service/)
+# ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# AWS SAM build artefacts
+.aws-sam/
+samconfig.toml
+
+# ─────────────────────────────────────────────
+# Logs
+# ─────────────────────────────────────────────
+*.log
+
+# ─────────────────────────────────────────────
+# OS files
+# ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─────────────────────────────────────────────
+# Editor / IDE
+# ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

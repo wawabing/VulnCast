@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VulnCast - Enterprise Security Intelligence</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <i class="fas fa-shield-alt"></i>
+        <span>VulnCast</span>
+      </div>
+      <nav class="nav">
+        <a href="#" class="nav-link">Features</a>
+        <a href="#" class="nav-link">Pricing</a>
+        <a href="#" class="nav-link">Contact</a>
+      </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+      <div class="hero">
+        <h1 class="hero-title">Enterprise Security Intelligence</h1>
+        <p class="hero-subtitle">Transform your vulnerability data into actionable insights with AI-powered analytics</p>
+        
+        <!-- Upload Section -->
+        <div class="upload-section">
+          <div class="upload-card">
+            <div class="upload-icon">
+              <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <h3>Upload Security Data</h3>
+            <p>Upload your Intune CSV files to get started with intelligent vulnerability analysis</p>
+            
+            <button id="uploadBtn" class="upload-btn">
+              <i class="fas fa-upload"></i>
+              Choose CSV File
+            </button>
+            
+            <input type="file" id="fileInput" accept=".csv" style="display: none;" />
+            
+            <div id="fileName" class="file-status"></div>
+          </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h4>Real-time Analytics</h4>
+            <p>Get instant insights from your security data</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-shield-check"></i>
+            </div>
+            <h4>Threat Detection</h4>
+            <p>Advanced algorithms detect vulnerabilities</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-users-cog"></i>
+            </div>
+            <h4>Team Management</h4>
+            <p>Collaborate with your security team</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>&copy; 2025 VulnCast. Securing the digital future.</p>
+    </footer>
+  </div>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

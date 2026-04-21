@@ -1,0 +1,415 @@
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <i class="fas fa-shield-alt"></i>
+      <span>VulnCast</span>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/dashboard" class="nav-item <%= activeNav === 'dashboard' ? 'active' : '' %>">
+      <i class="fas fa-tachometer-alt"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="/devices" class="nav-item <%= activeNav === 'devices' ? 'active' : '' %>">
+      <i class="fas fa-laptop"></i>
+      <span>Devices</span>
+    </a>
+    <a href="/users" class="nav-item <%= activeNav === 'users' ? 'active' : '' %>">
+      <i class="fas fa-users"></i>
+      <span>Users</span>
+    </a>
+    <a href="/applications" class="nav-item <%= activeNav === 'applications' ? 'active' : '' %>">
+      <i class="fas fa-cube"></i>
+      <span>Applications</span>
+    </a>
+    <a href="/vulnerabilities" class="nav-item <%= activeNav === 'vulnerabilities' ? 'active' : '' %>">
+      <i class="fas fa-bug"></i>
+      <span>Vulnerabilities</span>
+    </a>
+    <a href="/forecast" class="nav-item <%= activeNav === 'forecast' ? 'active' : '' %>">
+      <i class="fas fa-chart-line"></i>
+      <span>Forecast</span>
+    </a>
+    <a href="/supply-chain" class="nav-item <%= activeNav === 'supply-chain' ? 'active' : '' %>">
+      <i class="fas fa-link"></i>
+      <span>Supply Chain</span>
+    </a>
+    <a href="#" class="nav-item nav-upload" id="uploadSbomBtn" onclick="openSbomModal(event)">
+      <i class="fas fa-file-code"></i>
+      <span>Upload SBOM</span>
+    </a>
+
+    <div class="sidebar-user">
+      <% if (user) { %>
+        <div class="user-info">
+          <i class="fas fa-user-circle"></i>
+          <span class="user-name"><%= user.username || user.email || 'User' %></span>
+        </div>
+        <a href="/profile" class="nav-item <%= activeNav === 'profile' ? 'active' : '' %>">
+          <i class="fas fa-id-badge"></i>
+          <span>Profile</span>
+        </a>
+        <a href="/logout" class="nav-item nav-logout">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Sign Out</span>
+        </a>
+      <% } %>
+    </div>
+  </nav>
+</aside>
+
+<!-- SBOM Upload Modal -->
+<div class="modal-overlay" id="sbomModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2><i class="fas fa-file-code"></i> Upload SBOM</h2>
+      <button class="modal-close" id="sbomCloseBtn" onclick="closeSbomModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Form state -->
+      <div id="sbomFormContent">
+        <div class="form-group">
+          <label for="applicationSelect">Select Application</label>
+          <select id="applicationSelect" class="form-select">
+            <option value="">-- Select an application --</option>
+          </select>
+          <span class="sbom-field-error" id="appError"></span>
+        </div>
+        <div class="form-group">
+          <label for="sbomFile">SBOM File (JSON/XML)</label>
+          <div class="file-upload-area" id="sbomDropZone">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Drag & drop your SBOM file here</p>
+            <p class="file-hint">or click to browse</p>
+            <input type="file" id="sbomFile" accept=".json,.xml,.spdx,.cdx" hidden>
+            <span class="selected-file" id="selectedFileName"></span>
+          </div>
+          <span class="sbom-field-error" id="fileError"></span>
+        </div>
+        <div class="form-group">
+          <label>Supported Formats</label>
+          <div class="format-badges">
+            <span class="format-badge">SPDX</span>
+            <span class="format-badge">CycloneDX</span>
+            <span class="format-badge">SWID</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress state -->
+      <div id="sbomProgress" style="display:none">
+        <div class="sbom-prog-header">
+          <i class="fas fa-search fa-pulse"></i>
+          <h3 id="sbomProgTitle">Scanning Components</h3>
+        </div>
+        <div class="sbom-prog-bar-wrap">
+          <div class="sbom-prog-bar" id="sbomProgBar" style="width:0%"></div>
+        </div>
+        <div class="sbom-prog-info">
+          <span id="sbomProgPct">0%</span>
+          <span id="sbomProgCount">0 / 0</span>
+        </div>
+        <div class="sbom-prog-component" id="sbomProgComponent">Parsing SBOM…</div>
+        <div class="sbom-prog-stats">
+          <span class="sbom-prog-stat sbom-prog-clean"><i class="fas fa-check"></i> <span id="sbomCleanN">0</span> clean</span>
+          <span class="sbom-prog-stat sbom-prog-vuln"><i class="fas fa-bug"></i> <span id="sbomVulnN">0</span> vulnerable</span>
+          <span class="sbom-prog-stat sbom-prog-skip"><i class="fas fa-forward"></i> <span id="sbomSkipN">0</span> skipped</span>
+        </div>
+      </div>
+
+      <!-- Results state -->
+      <div id="sbomResultContent" style="display:none">
+        <div class="sbom-res-icon" id="sbomResIcon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h3 class="sbom-res-title" id="sbomResTitle">Scan Complete</h3>
+        <p class="sbom-res-desc" id="sbomResDesc"></p>
+        <div class="sbom-res-grid">
+          <div class="sbom-res-stat">
+            <span class="sbom-res-val" id="sbomResComps">0</span>
+            <span class="sbom-res-label">Components</span>
+          </div>
+          <div class="sbom-res-stat">
+            <span class="sbom-res-val" id="sbomResVulnComps">0</span>
+            <span class="sbom-res-label">Vulnerable</span>
+          </div>
+          <div class="sbom-res-stat">
+            <span class="sbom-res-val" id="sbomResVulns">0</span>
+            <span class="sbom-res-label">Vulnerabilities</span>
+          </div>
+          <div class="sbom-res-stat">
+            <span class="sbom-res-val" id="sbomResSkipped">0</span>
+            <span class="sbom-res-label">Skipped</span>
+          </div>
+        </div>
+        <p class="sbom-res-time" id="sbomResTime"></p>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <div id="sbomFormFooter">
+        <button class="btn btn-secondary" onclick="closeSbomModal()">Cancel</button>
+        <button class="btn btn-primary" id="sbomSubmitBtn" onclick="submitSbom()">
+          <i class="fas fa-upload"></i> Upload SBOM
+        </button>
+      </div>
+      <div id="sbomResultsFooter" style="display:none">
+        <button class="btn btn-secondary" onclick="closeSbomModal()">Close</button>
+        <a class="btn btn-primary" href="/supply-chain">
+          <i class="fas fa-link"></i> View Supply Chain
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Load apps for dropdown ─────────────────────────────
+async function loadApplicationsForModal() {
+  try {
+    const response = await fetch('/api/latest-schema');
+    const data = await response.json();
+    if (data.success && data.schema && data.schema.applications) {
+      const select = document.getElementById('applicationSelect');
+      data.schema.applications.forEach(app => {
+        const option = document.createElement('option');
+        option.value = app.application_key;
+        option.textContent = `${app.application_name} (${app.application_version || 'N/A'})`;
+        select.appendChild(option);
+      });
+    }
+  } catch (error) {
+    console.error('Error loading applications:', error);
+  }
+}
+
+// ─── Open / Close ───────────────────────────────────────
+function openSbomModal(event) {
+  event.preventDefault();
+  resetSbomModal();
+  document.getElementById('sbomModal').classList.add('active');
+  loadApplicationsForModal();
+}
+
+function closeSbomModal() {
+  document.getElementById('sbomModal').classList.remove('active');
+  resetSbomModal();
+}
+
+function resetSbomModal() {
+  document.getElementById('sbomFormContent').style.display = '';
+  document.getElementById('sbomProgress').style.display = 'none';
+  document.getElementById('sbomResultContent').style.display = 'none';
+  document.getElementById('sbomFormFooter').style.display = '';
+  document.getElementById('sbomResultsFooter').style.display = 'none';
+  document.getElementById('applicationSelect').innerHTML = '<option value="">-- Select an application --</option>';
+  document.getElementById('selectedFileName').textContent = '';
+  document.getElementById('appError').textContent = '';
+  document.getElementById('fileError').textContent = '';
+  document.getElementById('sbomCloseBtn').style.display = '';
+}
+
+// ─── File drag/drop ─────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  const dropZone = document.getElementById('sbomDropZone');
+  const fileInput = document.getElementById('sbomFile');
+  const fileNameDisplay = document.getElementById('selectedFileName');
+
+  if (dropZone && fileInput) {
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        fileNameDisplay.textContent = e.dataTransfer.files[0].name;
+        document.getElementById('fileError').textContent = '';
+      }
+    });
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) {
+        fileNameDisplay.textContent = fileInput.files[0].name;
+        document.getElementById('fileError').textContent = '';
+      }
+    });
+  }
+});
+
+// ─── Submit with SSE progress ───────────────────────────
+function submitSbom() {
+  const appSelect = document.getElementById('applicationSelect');
+  const app = appSelect.value;
+  const file = document.getElementById('sbomFile').files[0];
+  let valid = true;
+
+  document.getElementById('appError').textContent = '';
+  document.getElementById('fileError').textContent = '';
+
+  if (!app) {
+    document.getElementById('appError').textContent = 'Please select an application';
+    valid = false;
+  }
+  if (!file) {
+    document.getElementById('fileError').textContent = 'Please select an SBOM file';
+    valid = false;
+  }
+  if (!valid) return;
+
+  // Switch to progress view
+  document.getElementById('sbomFormContent').style.display = 'none';
+  document.getElementById('sbomFormFooter').style.display = 'none';
+  document.getElementById('sbomProgress').style.display = '';
+  document.getElementById('sbomCloseBtn').style.display = 'none';
+
+  // Progress counters
+  let cleanN = 0, vulnN = 0, skipN = 0, errN = 0, totalComps = 0;
+
+  const form = new FormData();
+  form.append('sbom', file);
+  form.append('applicationKey', app);
+  form.append('applicationName', appSelect.options[appSelect.selectedIndex].textContent);
+
+  fetch('/api/sbom/upload', { method: 'POST', body: form })
+    .then(response => {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = '';
+
+      function read() {
+        return reader.read().then(({ done, value }) => {
+          if (done) return;
+          buf += decoder.decode(value, { stream: true });
+          const lines = buf.split('\n');
+          buf = lines.pop();
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try { handleEvent(JSON.parse(line.slice(6))); } catch {}
+            }
+          }
+          return read();
+        });
+      }
+      return read();
+    })
+    .catch(err => {
+      showSbomError('Connection failed: ' + err.message);
+    });
+
+  function handleEvent(ev) {
+    switch (ev.type) {
+      case 'status':
+        document.getElementById('sbomProgComponent').textContent = ev.message;
+        break;
+
+      case 'parsed':
+        totalComps = ev.components;
+        document.getElementById('sbomProgComponent').textContent =
+          `Parsed ${ev.components} components (${ev.format}). Starting scan…`;
+        break;
+
+      case 'start':
+        totalComps = ev.totalComponents;
+        document.getElementById('sbomProgCount').textContent = `0 / ${totalComps}`;
+        break;
+
+      case 'progress': {
+        const done = ev.index + 1;
+        const pct = Math.round((done / ev.total) * 100);
+        document.getElementById('sbomProgBar').style.width = pct + '%';
+        document.getElementById('sbomProgPct').textContent = pct + '%';
+        document.getElementById('sbomProgCount').textContent = `${done} / ${ev.total}`;
+        document.getElementById('sbomProgComponent').textContent = ev.component;
+
+        if (ev.status === 'clean') cleanN++;
+        if (ev.status === 'vulnerable') vulnN++;
+        if (ev.status === 'skipped') skipN++;
+        if (ev.status === 'error') errN++;
+        document.getElementById('sbomCleanN').textContent = cleanN;
+        document.getElementById('sbomVulnN').textContent = vulnN;
+        document.getElementById('sbomSkipN').textContent = skipN;
+        break;
+      }
+
+      case 'complete':
+        document.getElementById('sbomProgBar').style.width = '100%';
+        document.getElementById('sbomProgPct').textContent = '100%';
+        document.getElementById('sbomProgComponent').textContent = 'Saving results…';
+        break;
+
+      case 'done':
+        showSbomResults(ev);
+        break;
+
+      case 'error':
+        showSbomError(ev.error);
+        break;
+    }
+  }
+}
+
+function showSbomResults(ev) {
+  const scan = ev.scan || {};
+  document.getElementById('sbomProgress').style.display = 'none';
+  document.getElementById('sbomResultContent').style.display = '';
+  document.getElementById('sbomResultsFooter').style.display = '';
+  document.getElementById('sbomCloseBtn').style.display = '';
+
+  const vulns = scan.totalVulnerabilities || 0;
+  const comps = scan.totalComponents || 0;
+  const vulnComps = scan.vulnerableComponents || 0;
+  const skipped = scan.skippedComponents || 0;
+
+  document.getElementById('sbomResComps').textContent = comps;
+  document.getElementById('sbomResVulnComps').textContent = vulnComps;
+  document.getElementById('sbomResVulns').textContent = vulns;
+  document.getElementById('sbomResSkipped').textContent = skipped;
+
+  const icon = document.getElementById('sbomResIcon');
+  if (vulns > 0) {
+    icon.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#ef4444"></i>';
+    document.getElementById('sbomResTitle').textContent = 'Vulnerabilities Detected';
+    document.getElementById('sbomResDesc').textContent =
+      `Found ${vulns} vulnerabilit${vulns === 1 ? 'y' : 'ies'} across ${vulnComps} component${vulnComps === 1 ? '' : 's'}.`;
+  } else {
+    icon.innerHTML = '<i class="fas fa-check-circle" style="color:#22c55e"></i>';
+    document.getElementById('sbomResTitle').textContent = 'Scan Complete';
+    if (skipped > 0 && skipped === comps) {
+      document.getElementById('sbomResDesc').textContent =
+        `All ${comps} components were skipped — they lack Package URLs (PURLs). OSV scanning works best with SBOMs from package managers (npm, pip, Maven, etc.).`;
+    } else if (skipped > 0) {
+      document.getElementById('sbomResDesc').textContent =
+        `Scanned ${comps - skipped} of ${comps} components. ${skipped} skipped (no PURL). No vulnerabilities found.`;
+    } else {
+      document.getElementById('sbomResDesc').textContent =
+        `All ${comps} components scanned. No known vulnerabilities found.`;
+    }
+  }
+
+  document.getElementById('sbomResTime').textContent =
+    'Completed ' + new Date().toLocaleTimeString();
+}
+
+function showSbomError(msg) {
+  document.getElementById('sbomProgress').style.display = 'none';
+  document.getElementById('sbomResultContent').style.display = '';
+  document.getElementById('sbomResultsFooter').style.display = '';
+  document.getElementById('sbomCloseBtn').style.display = '';
+  document.getElementById('sbomResIcon').innerHTML =
+    '<i class="fas fa-times-circle" style="color:#ef4444"></i>';
+  document.getElementById('sbomResTitle').textContent = 'Scan Failed';
+  document.getElementById('sbomResDesc').textContent = msg;
+  document.querySelector('.sbom-res-grid').style.display = 'none';
+}
+</script>

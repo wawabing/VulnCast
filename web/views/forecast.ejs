@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forecast - VulnCast</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="dashboard-container">
+    <%- include('partials/sidebar', { activeNav: 'forecast' }) %>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+      <header class="dashboard-header">
+        <h1><i class="fas fa-chart-line"></i> Vulnerability Forecast</h1>
+        <div class="header-actions">
+          <span class="last-updated" id="lastUpdated">Loading...</span>
+          <button class="refresh-btn" id="refreshBtn" title="Refresh forecasts">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Loading State -->
+      <div id="forecastLoading" class="forecast-loading-state">
+        <div class="forecast-loading-spinner"></div>
+        <p>Loading ARIMA forecast data...</p>
+      </div>
+
+      <!-- Error State -->
+      <div id="forecastError" class="forecast-error-state" style="display:none;">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p id="forecastErrorMsg">Failed to load forecast data.</p>
+        <button class="refresh-btn" onclick="location.reload()">Retry</button>
+      </div>
+
+      <!-- Main Content (hidden until loaded) -->
+      <div id="forecastContent" style="display:none;">
+
+        <!-- ═══════════════════════════════════════════════════════
+             YEARLY TOTAL CVE FORECAST
+             ═══════════════════════════════════════════════════════ -->
+        <div id="yearlySection">
+          <!-- Loading -->
+          <div id="yearlyLoading" class="yearly-loading">
+            <div class="forecast-loading-spinner" style="width:28px;height:28px;border-width:3px;"></div>
+            <span>Loading yearly forecast…</span>
+          </div>
+
+          <!-- Error -->
+          <div id="yearlyError" style="display:none;" class="yearly-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="yearlyErrorMsg">Failed to load yearly forecast.</span>
+          </div>
+
+          <!-- Content (filled by JS) -->
+          <div id="yearlyContent" style="display:none;">
+
+            <!-- Headline Hero -->
+            <div class="yearly-hero">
+              <div class="yearly-hero-main">
+                <div class="yearly-hero-label">Predicted Total CVEs for <span id="yearlyTargetYear">2026</span></div>
+                <div class="yearly-hero-value">
+                  <span id="yearlyForecastTotal">—</span>
+                  <span class="yearly-growth-badge" id="yearlyGrowthBadge" style="display:none;">
+                    <i class="fas fa-arrow-up"></i> <span id="yearlyGrowthPct">0</span>%
+                  </span>
+                </div>
+                <div class="yearly-hero-sub" id="yearlyHeroSub"></div>
+              </div>
+              <div class="yearly-hero-backtest">
+                <div class="yearly-bt-label">Backtest Accuracy (<span id="yearlyBtYear">2025</span>)</div>
+                <div class="yearly-bt-value" id="yearlyBtDiff">—</div>
+                <div class="yearly-bt-sub" id="yearlyBtSub"></div>
+              </div>
+            </div>
+
+            <!-- Year Progress Bar -->
+            <div class="yearly-progress-wrap" id="yearlyProgress" style="display:none;">
+              <div class="yearly-progress-header">
+                <span class="yearly-progress-title"><i class="fas fa-tasks"></i> Year Progress</span>
+                <span class="yearly-progress-label" id="yearlyProgressLabel">0 of 12 months actual</span>
+              </div>
+              <div class="yearly-progress-track">
+                <div class="yearly-progress-bar" id="yearlyProgressBar" style="width:0%"></div>
+              </div>
+              <div class="yearly-progress-detail" id="yearlyProgressDetail"></div>
+            </div>
+
+            <!-- Charts Row: Historical Yearly Bar + Monthly Line -->
+            <div class="yearly-charts-row">
+              <div class="yearly-chart-card">
+                <h4><i class="fas fa-chart-bar"></i> Annual CVE Totals</h4>
+                <div class="yearly-chart-wrap">
+                  <canvas id="yearlyBarChart"></canvas>
+                </div>
+              </div>
+              <div class="yearly-chart-card">
+                <h4><i class="fas fa-chart-line"></i> Monthly Trend & Forecast</h4>
+                <div class="yearly-chart-wrap">
+                  <canvas id="yearlyMonthlyChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Accuracy Table -->
+            <div id="yearlyAccuracySection" style="display:none;">
+              <div class="detail-card">
+                <div class="detail-header">
+                  <h3><i class="fas fa-bullseye"></i> Monthly Accuracy Breakdown</h3>
+                </div>
+                <div class="detail-content">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>Month</th>
+                        <th>Actual</th>
+                        <th>Predicted</th>
+                        <th>Diff %</th>
+                      </tr>
+                    </thead>
+                    <tbody id="yearlyAccuracyBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Metadata Footer -->
+            <div class="yearly-meta-bar">
+              <span><i class="fas fa-clock"></i> Last updated: <span id="yearlyUpdated">—</span></span>
+              <span><i class="fas fa-brain"></i> Model: <span id="yearlyModel">—</span></span>
+              <span><i class="fas fa-sliders-h"></i> Bias correction: <span id="yearlyBias">—</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Divider between yearly and per-CPE sections -->
+        <div class="yearly-divider">
+          <span>Per-CPE ARIMA Forecasts</span>
+        </div>
+
+        <!-- Aggregate Summary Cards -->
+        <div class="forecast-summary">
+          <div class="forecast-card current">
+            <div class="forecast-icon"><i class="fas fa-database"></i></div>
+            <div class="forecast-content">
+              <div class="forecast-value" id="totalCpes">0</div>
+              <div class="forecast-label">Tracked CPEs</div>
+              <div class="forecast-year" id="successFailCount">0 success · 0 failed</div>
+            </div>
+          </div>
+          <div class="forecast-card year1">
+            <div class="forecast-icon"><i class="fas fa-bug"></i></div>
+            <div class="forecast-content">
+              <div class="forecast-value" id="totalActualValue">0</div>
+              <div class="forecast-label" id="totalActualLabel">Actual CVEs</div>
+              <div class="forecast-year">Backtest baseline</div>
+            </div>
+          </div>
+          <div class="forecast-card year3">
+            <div class="forecast-icon"><i class="fas fa-arrow-trend-up"></i></div>
+            <div class="forecast-content">
+              <div class="forecast-value" id="totalPredictedValue">0</div>
+              <div class="forecast-label" id="totalPredictedLabel">Predicted CVEs</div>
+              <div class="forecast-year">ARIMA forecast</div>
+            </div>
+          </div>
+          <div class="forecast-card year5">
+            <div class="forecast-icon"><i class="fas fa-bullseye"></i></div>
+            <div class="forecast-content">
+              <div class="forecast-value" id="avgAccuracy">-</div>
+              <div class="forecast-label">Avg. Model Accuracy</div>
+              <div class="forecast-year" id="avgMapeLabel">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CPE Search / Filter -->
+        <div class="forecast-filter-bar">
+          <div class="filter-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="cpeSearch" placeholder="Search by vendor, product, or CPE..." />
+          </div>
+          <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="success">Success</button>
+            <button class="filter-btn" data-filter="failed">Failed</button>
+          </div>
+          <div class="filter-sort">
+            <select id="sortSelect">
+              <option value="forecast_desc">Highest predicted</option>
+              <option value="forecast_asc">Lowest predicted</option>
+              <option value="mape_asc">Best accuracy</option>
+              <option value="mape_desc">Worst accuracy</option>
+              <option value="vendor_asc">Vendor A-Z</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- CPE Forecast Cards Grid -->
+        <div class="cpe-forecast-grid" id="cpeForecastGrid">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Failed Forecasts Section -->
+        <div id="failedSection" style="display:none;">
+          <div class="detail-card">
+            <div class="detail-header">
+              <h3><i class="fas fa-times-circle"></i> Failed Forecasts</h3>
+            </div>
+            <div class="detail-content">
+              <table class="data-table" id="failedTable">
+                <thead>
+                  <tr>
+                    <th>CPE</th>
+                    <th>Error</th>
+                    <th>Last Attempt</th>
+                  </tr>
+                </thead>
+                <tbody id="failedTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- CPE Detail Modal (shown when a card is clicked) -->
+        <div class="forecast-modal-backdrop" id="forecastModal" style="display:none;">
+          <div class="forecast-modal">
+            <div class="forecast-modal-header">
+              <h2 id="modalTitle">CPE Detail</h2>
+              <button class="modal-close" id="modalClose"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="forecast-modal-body">
+              <!-- Headline -->
+              <div class="modal-headline" id="modalHeadline"></div>
+
+              <!-- Charts row -->
+              <div class="modal-charts-row">
+                <div class="modal-chart-card">
+                  <h4><i class="fas fa-chart-bar"></i> Historical + Forecast</h4>
+                  <div class="modal-chart-wrapper">
+                    <canvas id="modalHistoricalChart"></canvas>
+                  </div>
+                </div>
+                <div class="modal-chart-card">
+                  <h4><i class="fas fa-chart-line"></i> Period Forecast</h4>
+                  <div class="modal-chart-wrapper">
+                    <canvas id="modalForecastChart"></canvas>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-charts-row">
+                <div class="modal-chart-card full-width">
+                  <h4><i class="fas fa-check-double"></i> Backtest: Predicted vs Actual</h4>
+                  <div class="modal-chart-wrapper">
+                    <canvas id="modalBacktestChart"></canvas>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Accuracy Metrics -->
+              <div class="modal-metrics" id="modalMetrics"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="forecast-disclaimer">
+          <i class="fas fa-info-circle"></i>
+          <p><strong>ARIMA Forecast:</strong> Predictions are generated by an automated Lambda running ARIMA time-series 
+          models against NVD vulnerability history. Forecasts refresh every 24 hours. Backtest accuracy metrics validate 
+          prior-year predictions against actuals before projecting the forecast period.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/forecast.js"></script>
+</body>
+</html>

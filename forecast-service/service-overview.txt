@@ -1,0 +1,74 @@
+CPE Forecast Service — Overview for Dissertation
+=================================================
+
+PURPOSE
+-------
+Predicts future cybersecurity vulnerability (CVE) counts for software
+products using time-series forecasting. Given a list of software
+identifiers (CPEs), it forecasts how many vulnerabilities will be
+disclosed over the next 12 months.
+
+INPUT
+-----
+- A list of CPE (Common Platform Enumeration) strings stored in DynamoDB.
+  Example: cpe:2.3:a:microsoft:windows_10:1607:*:*:*:*:*:*:*
+- NVD (National Vulnerability Database) data — a JSONL file containing
+  all publicly disclosed CVEs with publication dates, CVSS scores, and
+  affected software (CPE matches).
+
+OUTPUT
+------
+- Per-CPE forecast results stored in DynamoDB, including:
+  - Predicted CVE counts per period (weekly/monthly/quarterly)
+  - 12-month total prediction
+  - Backtest accuracy metrics (Diff%, MAPE, MAE, RMSE)
+  - Historical yearly CVE counts for trend context
+  - Forecast level used (version / product / vendor)
+
+TECHNIQUES
+----------
+1. ARIMA (AutoRegressive Integrated Moving Average)
+   - SARIMAX implementation from statsmodels
+   - Grid search over p={0,1,2}, d={0,1}, q={0,1,2}
+   - Dual optimisation: one model minimises annual total error (Diff%),
+     another minimises per-period error (MAPE)
+
+2. Rolling forecast window
+   - Automatically uses all data through the most recent completed month
+   - Always forecasts the next 12 months ahead
+   - Backtests against the previous 12 months for accuracy validation
+
+3. Cascade resolution (version -> product -> vendor)
+   - Tries version-specific forecasting first
+   - Falls back to product-level if version has insufficient data
+   - Falls back to vendor-level as last resort
+
+4. Forecastability scoring
+   - Scores each entity 0-100 using six statistical metrics:
+     ACF1 (autocorrelation), Approximate Entropy (regularity),
+     Trend Strength (STL decomposition), Seasonal Strength (STL),
+     ADF Score (stationarity test), Naive MAPE (baseline accuracy)
+   - Tiered: HIGH (>=45), MEDIUM (>=35), LOW (>=1), NOT_FORECASTABLE
+   - Gates out entities with too few CVEs or insufficient history
+
+5. Auto-granularity selection
+   - Tests weekly, monthly, and quarterly aggregations
+   - Picks the granularity that produces the best backtest accuracy
+
+6. Seasonal features
+   - Month-of-year encoding
+   - Patch Tuesday detection (for weekly granularity)
+
+INFRASTRUCTURE
+--------------
+- AWS Lambda (containerised, 3GB RAM, 15-min timeout)
+- EventBridge schedule (every 30 minutes)
+- DynamoDB (input CPE list + output forecast results)
+- S3 (daily NVD data cache to avoid re-downloading)
+- CodeBuild + ECR (CI/CD pipeline)
+
+DATA SOURCE
+-----------
+- NVD (National Vulnerability Database) via NIST
+- Historical CVE data from 2017 onwards
+- Includes CVSS severity scores, affected CPE configurations

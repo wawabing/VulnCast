@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - VulnCast</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+</head>
+<body>
+  <div class="dashboard-container">
+    <%- include('partials/sidebar', { activeNav: 'dashboard' }) %>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+      <header class="dashboard-header">
+        <h1><i class="fas fa-shield-alt"></i> Security Risk Dashboard</h1>
+        <div class="header-actions">
+          <span class="last-updated" id="lastUpdated">Loading...</span>
+          <button class="refresh-btn" id="refreshBtn">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Loading State -->
+      <div id="dashLoading" class="dash-loading-state">
+        <div class="forecast-loading-spinner"></div>
+        <p>Computing risk analysis...</p>
+      </div>
+
+      <!-- Main Dashboard Content -->
+      <div id="dashContent" style="display:none;">
+
+        <!-- ═══ Risk Score Hero + Key Metrics ═══ -->
+        <div class="risk-hero-row">
+          <!-- Risk Score Gauge -->
+          <div class="risk-gauge-card">
+            <div class="risk-gauge-wrap">
+              <canvas id="riskGaugeChart" width="200" height="130"></canvas>
+            </div>
+            <div class="risk-gauge-label">
+              <span class="risk-gauge-value" id="riskScoreValue">--</span>
+              <span class="risk-gauge-sublabel">Organisation Risk Score</span>
+              <span class="risk-gauge-rating" id="riskScoreRating">--</span>
+            </div>
+            <div class="risk-breakdown" id="riskBreakdown">
+              <!-- Pillar bars populated by JS -->
+            </div>
+            <div class="risk-gauge-formula">
+              <i class="fas fa-info-circle"></i>
+              <span>75% Vulnerability &middot; 25% Coverage Gap</span>
+            </div>
+          </div>
+
+          <!-- Key Metrics -->
+          <div class="risk-metrics-col">
+            <div class="risk-metric-card risk-metric-critical">
+              <div class="risk-metric-icon"><i class="fas fa-radiation"></i></div>
+              <div class="risk-metric-body">
+                <span class="risk-metric-value" id="criticalVulnCount">0</span>
+                <span class="risk-metric-label">Critical Vulns</span>
+              </div>
+            </div>
+            <div class="risk-metric-card risk-metric-exploit">
+              <div class="risk-metric-icon"><i class="fas fa-crosshairs"></i></div>
+              <div class="risk-metric-body">
+                <span class="risk-metric-value" id="exploitReadyCount">0</span>
+                <span class="risk-metric-label">Exploit-Likely (EPSS &gt; 10%)</span>
+              </div>
+            </div>
+            <div class="risk-metric-card risk-metric-assets">
+              <div class="risk-metric-icon"><i class="fas fa-laptop-code"></i></div>
+              <div class="risk-metric-body">
+                <span class="risk-metric-value" id="assetsAtRiskCount">0 <small id="assetsAtRiskTotal">/ 0</small></span>
+                <span class="risk-metric-label">Assets Exposed</span>
+              </div>
+            </div>
+            <div class="risk-metric-card risk-metric-apps">
+              <div class="risk-metric-icon"><i class="fas fa-cube"></i></div>
+              <div class="risk-metric-body">
+                <span class="risk-metric-value" id="vulnAppCount">0 <small id="vulnAppTotal">/ 0</small></span>
+                <span class="risk-metric-label">Vulnerable Apps</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Risk Trend: Current vs Projected + What-If ═══ -->
+        <div class="dash-charts-row">
+          <div class="dash-chart-card dash-chart-wide">
+            <div class="dash-chart-header">
+              <h3><i class="fas fa-chart-line"></i> Vulnerability Growth Forecast</h3>
+              <span class="dash-chart-hint">ARIMA-forecasted CVE growth per application</span>
+            </div>
+            <div class="dash-chart-wrap dash-chart-tall">
+              <canvas id="riskTrendChart"></canvas>
+            </div>
+            <div class="dash-chart-footnote" id="trendChartFootnote" style="display:none;"></div>
+          </div>
+
+          <!-- What-If Patching Panel -->
+          <div class="dash-chart-card whatif-panel">
+            <div class="dash-chart-header">
+              <h3><i class="fas fa-flask"></i> What-If Scenario</h3>
+              <span class="dash-chart-hint">Select apps to simulate patching</span>
+            </div>
+
+            <!-- Impact Summary -->
+            <div class="whatif-impact" id="whatifImpact">
+              <div class="whatif-impact-row">
+                <div class="whatif-metric">
+                  <span class="whatif-label">Current CVEs</span>
+                  <span class="whatif-value whatif-current" id="whatifCurrent">--</span>
+                </div>
+                <div class="whatif-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="whatif-metric">
+                  <span class="whatif-label">After Patching (CVEs)</span>
+                  <span class="whatif-value whatif-after" id="whatifAfter">--</span>
+                </div>
+              </div>
+              <div class="whatif-reduction-bar" id="whatifReductionWrap">
+                <div class="whatif-reduction-fill" id="whatifReductionFill" style="width:0%"></div>
+              </div>
+              <div class="whatif-reduction-text" id="whatifReductionText">Select applications to see impact</div>
+            </div>
+
+            <!-- App Checkboxes -->
+            <div class="whatif-app-list" id="whatifAppList">
+              <!-- Populated by JS -->
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="whatif-actions">
+              <button class="whatif-btn whatif-btn-all" id="whatifSelectAll" title="Select all apps">
+                <i class="fas fa-check-double"></i> All
+              </button>
+              <button class="whatif-btn whatif-btn-clear" id="whatifClearAll" title="Clear selection">
+                <i class="fas fa-times"></i> Clear
+              </button>
+              <button class="whatif-btn whatif-btn-top5" id="whatifTop5" title="Select top 5 riskiest">
+                <i class="fas fa-fire"></i> Top 5
+              </button>
+            </div>
+
+            <!-- EOL Alternatives (integrated into side panel) -->
+            <div id="eolPanel" style="display:none;">
+              <div class="whatif-eol-divider">
+                <i class="fas fa-calendar-times"></i> End-of-Life Alternatives
+              </div>
+              <div class="eol-app-list" id="eolAppList">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Patching Recommendations ═══ -->
+        <div class="dash-section">
+          <div class="dash-section-header">
+            <h2><i class="fas fa-wrench"></i> Patching Recommendations</h2>
+            <span class="dash-section-sub">Ranked by risk reduction impact — patch these first</span>
+          </div>
+          <div class="patch-recommendations" id="patchRecommendations">
+            <p>Computing recommendations...</p>
+          </div>
+        </div>
+
+        <!-- ═══ Risk by Application + Severity + Risk by User ═══ -->
+        <div class="dash-charts-row dash-charts-equal">
+          <div class="dash-chart-card">
+            <div class="dash-chart-header">
+              <h3><i class="fas fa-cube"></i> Risk by Application (Top 10)</h3>
+            </div>
+            <div class="dash-chart-wrap dash-chart-tall">
+              <canvas id="riskByAppChart"></canvas>
+            </div>
+          </div>
+          <div class="dash-chart-card dash-chart-narrow">
+            <div class="dash-chart-header">
+              <h3><i class="fas fa-chart-pie"></i> Severity Breakdown</h3>
+            </div>
+            <div class="dash-chart-wrap">
+              <canvas id="severityDonutChart"></canvas>
+            </div>
+          </div>
+          <div class="dash-chart-card">
+            <div class="dash-chart-header">
+              <h3><i class="fas fa-user-shield"></i> Risk by User (Top 10)</h3>
+            </div>
+            <div class="dash-chart-wrap dash-chart-tall">
+              <canvas id="riskByUserChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Most Exploitable CVEs ═══ -->
+        <div class="dash-section">
+          <div class="dash-section-header">
+            <h2><i class="fas fa-crosshairs"></i> Most Exploitable Vulnerabilities</h2>
+            <span class="dash-section-sub">Highest EPSS scores — most likely to be exploited in the wild</span>
+          </div>
+          <div class="table-container">
+            <div class="table-wrapper">
+              <table class="data-table" id="topEpssTable">
+                <thead>
+                  <tr>
+                    <th>CVE ID</th>
+                    <th>Application</th>
+                    <th>CVSS</th>
+                    <th>EPSS</th>
+                    <th>Risk Score</th>
+                    <th>Devices Affected</th>
+                    <th>Severity</th>
+                  </tr>
+                </thead>
+                <tbody id="topEpssBody">
+                  <tr><td colspan="7" class="loading-row">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ Estate Overview (collapsed) ═══ -->
+        <div class="dash-section dash-section-secondary">
+          <div class="dash-section-header dash-section-toggle" id="estateToggle">
+            <h2><i class="fas fa-building"></i> Estate Overview</h2>
+            <i class="fas fa-chevron-down" id="estateChevron"></i>
+          </div>
+          <div class="estate-overview" id="estateOverview" style="display:none;">
+            <div class="metrics-grid">
+              <div class="metric-card devices">
+                <div class="metric-icon"><i class="fas fa-laptop"></i></div>
+                <div class="metric-content">
+                  <div class="metric-value" id="devicesCount">0</div>
+                  <div class="metric-label">Devices</div>
+                </div>
+              </div>
+              <div class="metric-card users">
+                <div class="metric-icon"><i class="fas fa-users"></i></div>
+                <div class="metric-content">
+                  <div class="metric-value" id="usersCount">0</div>
+                  <div class="metric-label">Users</div>
+                </div>
+              </div>
+              <div class="metric-card applications">
+                <div class="metric-icon"><i class="fas fa-cube"></i></div>
+                <div class="metric-content">
+                  <div class="metric-value" id="applicationsCount">0</div>
+                  <div class="metric-label">Applications</div>
+                </div>
+              </div>
+              <div class="metric-card platforms">
+                <div class="metric-icon"><i class="fas fa-server"></i></div>
+                <div class="metric-content">
+                  <div class="metric-value" id="platformsCount">0</div>
+                  <div class="metric-label">Platforms</div>
+                </div>
+              </div>
+              <div class="metric-card vulnerabilities">
+                <div class="metric-icon"><i class="fas fa-bug"></i></div>
+                <div class="metric-content">
+                  <div class="metric-value" id="vulnerabilitiesCount">0</div>
+                  <div class="metric-label">Total CVEs</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /dashContent -->
+    </main>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Devices - VulnCast</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.css" rel="stylesheet">
+</head>
+<body>
+  <div class="dashboard-container">
+    <%- include('partials/sidebar', { activeNav: 'devices' }) %>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+      <header class="dashboard-header">
+        <h1>Devices Management</h1>
+        <div class="header-actions">
+          <span class="last-updated" id="lastUpdated">Loading...</span>
+          <button class="refresh-btn" id="refreshBtn">
+            <i class="fas fa-sync-alt"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Devices Table -->
+      <div class="table-container">
+        <div class="table-header">
+          <h2><i class="fas fa-laptop"></i> All Devices</h2>
+          <div class="table-stats" id="deviceStats">
+            <span class="stat-badge">Loading...</span>
+          </div>
+        </div>
+        
+        <div class="table-wrapper">
+          <table class="data-table" id="devicesTable">
+            <thead>
+              <tr>
+                <th>Device Name</th>
+                <th>Device ID</th>
+                <th>Platform</th>
+                <th>OS Version</th>
+                <th>User</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="devicesTableBody">
+              <tr>
+                <td colspan="6" class="loading-row">Loading device data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/js/devices.js"></script>
+</body>
+</html>
