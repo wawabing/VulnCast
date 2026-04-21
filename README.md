@@ -2,7 +2,7 @@
 
 A vulnerability assessment platform that ingests an organisation's software inventory, maps each installation to Common Platform Enumeration (CPE) identifiers, enriches it with CVE and EPSS exploit-probability data, analyses supply-chain risk via Software Bill of Materials (SBOMs), and forecasts future vulnerability counts using time-series modelling.
 
-VulnCast is an MSc dissertation artefact. It explores whether a pragmatic combination of NVD-backed enrichment, per-CPE ARIMA forecasting with a hierarchical version → product → vendor fallback, and an ensemble XGBoost model for annual totals can give a small-to-medium organisation a useful forward view of their vulnerability exposure.
+VulnCast is a dissertation artefact. It explores whether a pragmatic combination of NVD-backed enrichment, per-CPE ARIMA forecasting with a hierarchical version → product → vendor fallback, and an ensemble XGBoost model for annual totals can give a small-to-medium organisation a useful forward view of their vulnerability exposure.
 
 ## Repository layout
 
