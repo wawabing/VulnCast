@@ -2,7 +2,9 @@
 
 A vulnerability assessment platform that ingests an organisation's software inventory, maps each installation to Common Platform Enumeration (CPE) identifiers, enriches it with CVE and EPSS exploit-probability data, analyses supply-chain risk via Software Bill of Materials (SBOMs), and forecasts future vulnerability counts using time-series modelling.
 
-VulnCast is a dissertation artefact. It explores whether a pragmatic combination of NVD-backed enrichment, per-CPE ARIMA forecasting with a hierarchical version → product → vendor fallback, and an ensemble XGBoost model for annual totals can give a small-to-medium organisation a useful forward view of their vulnerability exposure.
+VulnCast is a dissertation artefact. It explores whether a pragmatic combination of NVD-backed enrichment, per-CPE ARIMA forecasting with a hierarchical version → product → vendor fallback, an ensemble XGBoost model for annual totals, and end-of-life-aware alternative scoring can give a small-to-medium organisation a useful forward view of their vulnerability exposure.
+
+When an installed product is end-of-life — and therefore a growing, persistent future risk because no further patches will land — VulnCast does not just flag it. It proposes candidate replacement applications, runs each candidate through the same forecasting pipeline, and ranks them by projected vulnerability count so a patching strategy can pick the successor with the smallest forecasted future risk rather than a headline-familiar one.
 
 ## Repository layout
 
@@ -10,7 +12,7 @@ This repository is a monorepo containing three deployable components:
 
 | Folder | What it is | Runtime |
 |--------|------------|---------|
-| [`web/`](web/README.md) | Customer-facing web app — CSV ingest, CPE mapping, SBOM scan, dashboard, risk scoring | Node.js / Express, EJS views, AWS Cognito auth, S3 + DynamoDB backend |
+| [`web/`](web/README.md) | Customer-facing web app — CSV ingest, CPE mapping, CVE / EPSS enrichment, EOL detection, SBOM scan, alternative-product suggestions, dashboard + risk scoring | Node.js / Express, EJS views, AWS Cognito auth, S3 + DynamoDB backend |
 | [`forecast-service/`](forecast-service/README.md) | Per-CPE vulnerability forecasting — dual-optimised ARIMA with version/product/vendor fallback | Containerised AWS Lambda (Python 3.12), EventBridge every 30 minutes |
 | [`forecast-yearly-service/`](forecast-yearly-service/README.md) | Annual CVE-total forecasting — XGBoost ensemble with adaptive bias correction | Containerised AWS Lambda (Python 3.12), EventBridge daily |
 
@@ -27,6 +29,11 @@ Each component has its own README covering deployment and internals.
 │                                ▼                        ▼                │
 │                        writes CPEs to          stores enriched schema    │
 │                        forecast-cpes (DDB)     in S3 per tenant          │
+│                                                                          │
+│   EOL lookup (endoflife.date) ──►  is_eol / days_to_eol / alternatives   │
+│                    │                                                     │
+│                    └──►  each alternative also CPE-mapped and pushed to  │
+│                          forecast-cpes so the Lambda forecasts its risk  │
 │                                                                          │
 │   SBOM upload ──►  parser (SPDX/CycloneDX/SWID) ──►  OSV.dev scan        │
 │                                                                          │
@@ -88,6 +95,7 @@ Core research contributions:
 2. **Dual-objective ARIMA** — each forecastable entity is fit twice: once to minimise annual-total Diff%, once to minimise per-period MAPE. The first answers "how many CVEs will land this year?"; the second answers "when?".
 3. **Adaptive-bias XGBoost for annual totals** — because unmeasurable drivers (AI-assisted discovery, new attack surfaces, regulatory change) systematically inflate CVE counts, the yearly model measures its own historical bias and corrects forward, then blends with a per-calendar-month growth-rate projection.
 4. **Live recalibration** — as months of the target year complete, the model swaps in real counts and damps its future predictions against the observed error, weighted by how many months of evidence it has.
+5. **EOL-aware alternative scoring** — end-of-life products are treated as persistent forward risk (no patches coming, attack surface only grows). When one is flagged, VulnCast derives candidate successors via endoflife.date's shared-tag graph, CPE-maps each, and pushes them into the same forecasting pipeline. The dashboard then ranks successors by projected vulnerability count so a patching decision can favour the lowest-forecast-risk option rather than a familiar-brand default.
 
 Deeper methodology sits in [`forecast-service/service-overview.txt`](forecast-service/service-overview.txt) and [`forecast-yearly-service/summary-service-year.txt`](forecast-yearly-service/summary-service-year.txt).
 

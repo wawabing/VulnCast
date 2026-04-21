@@ -9,7 +9,7 @@ This is one of three components in the VulnCast repository. For the overall arch
 - CSV upload + parsing for both Intune Raw (13 columns) and Intune Aggregate (7 columns) formats
 - Automatic CPE discovery against the NVD CPE API, with publisher-aware search and dual API-key rotation on rate limit
 - CVE enrichment with CVSS severity, EPSS exploit probability, and reference URLs
-- End-of-life detection with recommended-replacement tracking via endoflife.date
+- End-of-life detection via endoflife.date, treating EOL products as persistent future risk (no more patches, attack surface only grows). When an app or OS is EOL, VulnCast proposes candidate successor products, CPE-maps each, and pushes them into the forecasting pipeline so the dashboard can rank alternatives by projected vulnerability count — letting a patching decision pick the lowest-forecast-risk successor rather than a familiar-brand default
 - SBOM ingestion (SPDX / CycloneDX / SWID) with live OSV.dev scanning streamed over Server-Sent Events
 - Forecast dashboard showing per-CPE predicted CVE counts and an aggregate yearly forecast, sourced from the two Lambda services
 - Risk scoring on the executive dashboard combining CVSS × EPSS × blast-radius per installation
