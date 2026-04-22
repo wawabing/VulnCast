@@ -1,0 +1,189 @@
+<mxfile host="app.diagrams.net" agent="claude">
+  <diagram name="VulnCast Architecture" id="vulncast-arch">
+    <mxGraphModel dx="1269" dy="636" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="600" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;fontColor=#232F3E;" value="VulnCast — System Architecture" vertex="1">
+          <mxGeometry height="30" width="1120" x="40" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#666666;" value="account 996041912095 · region eu-west-2" vertex="1">
+          <mxGeometry height="20" width="1120" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="aws_cloud" parent="1" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=13;fontStyle=1;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_aws_cloud_alt;strokeColor=#232F3E;fillColor=none;verticalAlign=top;align=left;spacingLeft=35;spacingTop=5;fontColor=#232F3E;dashed=0;" value="AWS Cloud (eu-west-2)" vertex="1">
+          <mxGeometry height="670" width="1120" x="40" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="group_forecast" parent="aws_cloud" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=11;fontStyle=1;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;strokeColor=#147EBA;fillColor=#F2F7FD;verticalAlign=top;align=left;spacingLeft=10;spacingTop=4;fontColor=#147EBA;dashed=1;" value="Forecasting pipeline" vertex="1">
+          <mxGeometry height="290" width="620" x="190" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="group_cicd" parent="aws_cloud" style="points=[[0,0],[0.25,0],[0.5,0],[0.75,0],[1,0],[1,0.25],[1,0.5],[1,0.75],[1,1],[0.75,1],[0.5,1],[0.25,1],[0,1],[0,0.75],[0,0.5],[0,0.25]];outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=11;fontStyle=1;container=1;pointerEvents=0;collapsible=0;recursiveResize=0;strokeColor=#C925D1;fillColor=#FBF3FC;verticalAlign=top;align=left;spacingLeft=10;spacingTop=4;fontColor=#C925D1;dashed=1;" value="CI / CD (CodeBuild → ECR → Lambda)" vertex="1">
+          <mxGeometry height="170" width="1050" x="30" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="cognito" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#DD344C;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cognito;" value="Cognito User Pool&#xa;eu-west-2_gC4OxZcwq" vertex="1">
+          <mxGeometry height="64" width="64" x="50" y="55" as="geometry" />
+        </mxCell>
+        <mxCell id="s3_intune" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#7AA116;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.simple_storage_service;" value="S3 bucket&#xa;disser-forecast-user-intune&#xa;(tenant schemas + SBOMs)" vertex="1">
+          <mxGeometry height="64" width="64" x="50" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="ddb_cpes" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#C925D1;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;" value="DynamoDB&#xa;forecast-cpes&#xa;(input: CPEs to forecast)" vertex="1">
+          <mxGeometry height="64" width="64" x="220" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="ddb_results" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#C925D1;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;" value="DynamoDB&#xa;cpe-forecast-results&#xa;(per-CPE forecasts)" vertex="1">
+          <mxGeometry height="64" width="64" x="510" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="ddb_yearly" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#C925D1;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;" value="DynamoDB&#xa;forecast-cve-yearly&#xa;(yearly totals)" vertex="1">
+          <mxGeometry height="64" width="64" x="720" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="eb_30m" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.eventbridge;" value="EventBridge&#xa;every 30 min" vertex="1">
+          <mxGeometry height="64" width="64" x="220" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="lambda_cpe" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;" value="Lambda&#xa;cpe-forecast-service&#xa;dual ARIMA + fallback" vertex="1">
+          <mxGeometry height="64" width="64" x="370" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="lambda_yearly" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;" value="Lambda&#xa;cve-yearly-forecast&#xa;XGBoost + bias correction" vertex="1">
+          <mxGeometry height="64" width="64" x="580" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="eb_daily" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#E7157B;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.eventbridge;" value="EventBridge&#xa;daily" vertex="1">
+          <mxGeometry height="64" width="64" x="720" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="s3_nvd" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#7AA116;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.simple_storage_service;" value="S3 bucket&#xa;cpe-forecast-nvd-cache-*&#xa;(shared NVD JSONL, 24h TTL)" vertex="1">
+          <mxGeometry height="64" width="64" x="940" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="s3_source" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#7AA116;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.simple_storage_service;" value="S3 bucket&#xa;cpe-forecast-build-source" vertex="1">
+          <mxGeometry height="64" width="64" x="80" y="545" as="geometry" />
+        </mxCell>
+        <mxCell id="cb_cpe" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#C925D1;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.codebuild;" value="CodeBuild&#xa;cpe-forecast-service" vertex="1">
+          <mxGeometry height="64" width="64" x="270" y="545" as="geometry" />
+        </mxCell>
+        <mxCell id="ecr_cpe" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.elastic_container_registry;" value="ECR&#xa;cpe-forecast-service" vertex="1">
+          <mxGeometry height="64" width="64" x="450" y="545" as="geometry" />
+        </mxCell>
+        <mxCell id="cb_yearly" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#C925D1;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.codebuild;" value="CodeBuild&#xa;cve-yearly-forecast" vertex="1">
+          <mxGeometry height="64" width="64" x="630" y="545" as="geometry" />
+        </mxCell>
+        <mxCell id="ecr_yearly" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.elastic_container_registry;" value="ECR&#xa;cve-yearly-forecast" vertex="1">
+          <mxGeometry height="64" width="64" x="810" y="545" as="geometry" />
+        </mxCell>
+        <mxCell id="e_eb_lambdacpe" edge="1" parent="aws_cloud" source="eb_30m" style="endArrow=classic;html=1;fontSize=10;strokeColor=#E7157B;" target="lambda_cpe" value="trigger">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_lambdacpe_ddbcpes" edge="1" parent="aws_cloud" source="lambda_cpe" style="endArrow=classic;html=1;fontSize=10;strokeColor=#C925D1;dashed=1;" target="ddb_cpes" value="read CPEs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_lambdacpe_s3nvd" edge="1" parent="aws_cloud" source="lambda_cpe" style="endArrow=classic;html=1;fontSize=10;strokeColor=#7AA116;" target="s3_nvd" value="NVD cache r/w">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_lambdacpe_ddbresults" edge="1" parent="aws_cloud" source="lambda_cpe" style="endArrow=classic;html=1;fontSize=10;strokeColor=#C925D1;" target="ddb_results" value="write forecasts">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="450" y="290" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_eb_lambdayearly" edge="1" parent="aws_cloud" source="eb_daily" style="endArrow=classic;html=1;fontSize=10;strokeColor=#E7157B;" target="lambda_yearly" value="trigger">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_lambdayearly_s3nvd" edge="1" parent="aws_cloud" source="lambda_yearly" style="endArrow=classic;html=1;fontSize=10;strokeColor=#7AA116;" target="s3_nvd" value="NVD cache r/w">
+          <mxGeometry relative="1" x="0.2534" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="860" y="400" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_lambdayearly_ddbyearly" edge="1" parent="aws_cloud" source="lambda_yearly" style="endArrow=classic;html=1;fontSize=10;strokeColor=#C925D1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="ddb_yearly" value="write yearly">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_s3src_cb_cpe" edge="1" parent="aws_cloud" source="s3_source" style="endArrow=classic;html=1;fontSize=10;strokeColor=#C925D1;" target="cb_cpe">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cb_ecr_cpe" edge="1" parent="aws_cloud" source="cb_cpe" style="endArrow=classic;html=1;fontSize=10;strokeColor=#C925D1;" target="ecr_cpe">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ecr_lambda_cpe" edge="1" parent="aws_cloud" source="ecr_cpe" style="endArrow=classic;html=1;fontSize=10;strokeColor=#ED7100;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="lambda_cpe" value="container image">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_s3src_cb_yearly" edge="1" parent="aws_cloud" source="Nuf4mXOdo3-8lDiHFopT-4" style="endArrow=classic;html=1;fontSize=10;strokeColor=#C925D1;" target="cb_yearly">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_cb_ecr_yearly" edge="1" parent="aws_cloud" source="cb_yearly" style="endArrow=classic;html=1;fontSize=10;strokeColor=#C925D1;" target="ecr_yearly">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ecr_lambda_yearly" edge="1" parent="aws_cloud" source="ecr_yearly" style="endArrow=classic;html=1;fontSize=10;strokeColor=#ED7100;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="lambda_yearly" value="container image">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Nuf4mXOdo3-8lDiHFopT-1" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#7AA116;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;" value="" vertex="1">
+          <mxGeometry height="70" width="70" x="50" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="Nuf4mXOdo3-8lDiHFopT-2" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#7AA116;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;" value="" vertex="1">
+          <mxGeometry height="70" width="70" x="937" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="Nuf4mXOdo3-8lDiHFopT-3" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#7AA116;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;" value="" vertex="1">
+          <mxGeometry height="60" width="60" x="84" y="547" as="geometry" />
+        </mxCell>
+        <mxCell id="Nuf4mXOdo3-8lDiHFopT-5" edge="1" parent="aws_cloud" source="s3_source" style="endArrow=classic;html=1;fontSize=10;strokeColor=#C925D1;" target="Nuf4mXOdo3-8lDiHFopT-4" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="184" y="777" as="sourcePoint" />
+            <mxPoint x="670" y="777" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Nuf4mXOdo3-8lDiHFopT-4" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ecr;" value="" vertex="1">
+          <mxGeometry height="58" width="58" x="453" y="548" as="geometry" />
+        </mxCell>
+        <mxCell id="Nuf4mXOdo3-8lDiHFopT-6" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.ecr;" value="" vertex="1">
+          <mxGeometry height="58" width="58" x="813" y="547" as="geometry" />
+        </mxCell>
+        <mxCell id="webapp" parent="aws_cloud" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;fontStyle=1;" value="VulnCast Web App&lt;br&gt;Node.js + Express + EJS&lt;br&gt;(App Runner)" vertex="1">
+          <mxGeometry height="78" width="330" x="290" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="Nuf4mXOdo3-8lDiHFopT-7" parent="aws_cloud" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.app_runner;" value="" vertex="1">
+          <mxGeometry height="78" width="78" x="530" y="21" as="geometry" />
+        </mxCell>
+        <mxCell id="e_web_cognito" edge="1" parent="aws_cloud" source="webapp" style="endArrow=classic;html=1;fontSize=10;exitX=0;exitY=0.25;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;strokeColor=#DD344C;entryPerimeter=0;" target="cognito" value="OIDC auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_web_s3intune" edge="1" parent="aws_cloud" source="webapp" style="endArrow=classic;html=1;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#7AA116;" target="s3_intune" value="store&#xa;schemas + SBOMs">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="240" y="130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_web_ddbcpes" edge="1" parent="aws_cloud" source="webapp" style="endArrow=classic;html=1;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#C925D1;" target="ddb_cpes" value="write CPEs&#xa;(incl. EOL alternatives)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="380" y="170" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_web_ddbresults" edge="1" parent="aws_cloud" source="webapp" style="endArrow=classic;html=1;fontSize=10;dashed=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#C925D1;" target="ddb_results" value="read forecasts">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_web_ddbyearly" edge="1" parent="aws_cloud" source="webapp" style="endArrow=classic;html=1;fontSize=10;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#C925D1;" target="ddb_yearly" value="read yearly">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_web_lambdacpe" edge="1" parent="aws_cloud" source="webapp" style="endArrow=classic;html=1;fontSize=10;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#ED7100;" target="lambda_cpe" value="on-demand&#xa;invoke">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="user" parent="1" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3E;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.user;" value="End user" vertex="1">
+          <mxGeometry height="78" width="78" x="240" y="91" as="geometry" />
+        </mxCell>
+        <mxCell id="external_apis" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=14;verticalAlign=top;spacingTop=6;" value="External APIs&#xa;&#xa;• NVD (CPE / CVE)&#xa;• FIRST EPSS&#xa;• OSV.dev (SBOM scan)&#xa;• endoflife.date (EOL + alternatives)" vertex="1">
+          <mxGeometry height="104" width="240" x="770" y="78" as="geometry" />
+        </mxCell>
+        <mxCell id="e_user_web" edge="1" parent="1" source="user" style="endArrow=classic;html=1;fontSize=10;strokeColor=#232F3E;" target="webapp" value="HTTPS">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_web_apis" edge="1" parent="1" source="webapp" style="endArrow=classic;html=1;fontSize=10;strokeColor=#D6B656;" target="external_apis" value="public APIs">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_s3nvd_source" edge="1" parent="1" source="s3_nvd" style="endArrow=classic;html=1;fontSize=10;dashed=1;strokeColor=#666666;endArrow=classic;startArrow=classic;" target="external_apis" value="fetch fresh&#xa;NVD JSONL&#xa;(handsonhacking.org)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;fontSize=10;align=left;verticalAlign=top;spacingLeft=10;spacingTop=6;" value="&lt;b&gt;Legend&lt;/b&gt;&lt;br&gt;&#xa;• Solid arrows = synchronous / triggered data flow&lt;br&gt;&#xa;• Dashed arrows = read-only reference, on-demand invoke, or image pull&lt;br&gt;&#xa;• Orange icons = Compute (Lambda, ECR)&lt;br&gt;&#xa;• Green icons = Storage (S3)&lt;br&gt;&#xa;• Purple icons = Database / Dev tools (DynamoDB, CodeBuild)&lt;br&gt;&#xa;• Pink icons = Application integration (EventBridge)&lt;br&gt;&#xa;• Red icon = Security (Cognito)" vertex="1">
+          <mxGeometry height="210" width="350" x="810" y="880" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
