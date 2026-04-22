@@ -110,3 +110,4 @@ This is a dissertation submission, not a production service. Known limitations a
 - [OSV.dev](https://osv.dev/) — open-source vulnerability database for SBOM scanning
 - [endoflife.date](https://endoflife.date/) — product end-of-life dates
 - NVD mirror at [handsonhacking.org](https://nvd.handsonhacking.org/nvd.jsonl) — bulk NVD JSONL for the forecasting Lambdas
+- My Supervisor **Jamie O'Hare** (https://oha.re/) for enlightening me on this topic, and supporting me throughout.
